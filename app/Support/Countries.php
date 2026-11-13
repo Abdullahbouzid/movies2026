@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Support;
+
+class Countries
+{
+    /**
+     * @return array<int, array{name:string, name_en:string, code:string, flag:string}>
+     */
+    public static function all(): array
+    {
+        return [
+            ['name' => 'ليبيا', 'name_en' => 'Libya', 'code' => '+218', 'flag' => '🇱🇾'],
+            ['name' => 'السعودية', 'name_en' => 'Saudi Arabia', 'code' => '+966', 'flag' => '🇸🇦'],
+            ['name' => 'مصر', 'name_en' => 'Egypt', 'code' => '+20', 'flag' => '🇪🇬'],
+            ['name' => 'الإمارات', 'name_en' => 'UAE', 'code' => '+971', 'flag' => '🇦🇪'],
+            ['name' => 'الكويت', 'name_en' => 'Kuwait', 'code' => '+965', 'flag' => '🇰🇼'],
+            ['name' => 'قطر', 'name_en' => 'Qatar', 'code' => '+974', 'flag' => '🇶🇦'],
+            ['name' => 'البحرين', 'name_en' => 'Bahrain', 'code' => '+973', 'flag' => '🇧🇭'],
+            ['name' => 'عُمان', 'name_en' => 'Oman', 'code' => '+968', 'flag' => '🇴🇲'],
+            ['name' => 'الأردن', 'name_en' => 'Jordan', 'code' => '+962', 'flag' => '🇯🇴'],
+            ['name' => 'لبنان', 'name_en' => 'Lebanon', 'code' => '+961', 'flag' => '🇱🇧'],
+            ['name' => 'سوريا', 'name_en' => 'Syria', 'code' => '+963', 'flag' => '🇸🇾'],
+            ['name' => 'العراق', 'name_en' => 'Iraq', 'code' => '+964', 'flag' => '🇮🇶'],
+            ['name' => 'فلسطين', 'name_en' => 'Palestine', 'code' => '+970', 'flag' => '🇵🇸'],
+            ['name' => 'اليمن', 'name_en' => 'Yemen', 'code' => '+967', 'flag' => '🇾🇪'],
+            ['name' => 'السودان', 'name_en' => 'Sudan', 'code' => '+249', 'flag' => '🇸🇩'],
+            ['name' => 'المغرب', 'name_en' => 'Morocco', 'code' => '+212', 'flag' => '🇲🇦'],
+            ['name' => 'الجزائر', 'name_en' => 'Algeria', 'code' => '+213', 'flag' => '🇩🇿'],
+            ['name' => 'تونس', 'name_en' => 'Tunisia', 'code' => '+216', 'flag' => '🇹🇳'],
+            ['name' => 'موريتانيا', 'name_en' => 'Mauritania', 'code' => '+222', 'flag' => '🇲🇷'],
+            ['name' => 'الصومال', 'name_en' => 'Somalia', 'code' => '+252', 'flag' => '🇸🇴'],
+            ['name' => 'جيبوتي', 'name_en' => 'Djibouti', 'code' => '+253', 'flag' => '🇩🇯'],
+            ['name' => 'جزر القمر', 'name_en' => 'Comoros', 'code' => '+269', 'flag' => '🇰🇲'],
+            ['name' => 'تركيا', 'name_en' => 'Turkey', 'code' => '+90', 'flag' => '🇹🇷'],
+            ['name' => 'إيران', 'name_en' => 'Iran', 'code' => '+98', 'flag' => '🇮🇷'],
+            ['name' => 'باكستان', 'name_en' => 'Pakistan', 'code' => '+92', 'flag' => '🇵🇰'],
+            ['name' => 'الهند', 'name_en' => 'India', 'code' => '+91', 'flag' => '🇮🇳'],
+            ['name' => 'بنغلاديش', 'name_en' => 'Bangladesh', 'code' => '+880', 'flag' => '🇧🇩'],
+            ['name' => 'إندونيسيا', 'name_en' => 'Indonesia', 'code' => '+62', 'flag' => '🇮🇩'],
+            ['name' => 'ماليزيا', 'name_en' => 'Malaysia', 'code' => '+60', 'flag' => '🇲🇾'],
+            ['name' => 'الفلبين', 'name_en' => 'Philippines', 'code' => '+63', 'flag' => '🇵🇭'],
+            ['name' => 'الصين', 'name_en' => 'China', 'code' => '+86', 'flag' => '🇨🇳'],
+            ['name' => 'اليابان', 'name_en' => 'Japan', 'code' => '+81', 'flag' => '🇯🇵'],
+            ['name' => 'كوريا الجنوبية', 'name_en' => 'South Korea', 'code' => '+82', 'flag' => '🇰🇷'],
+            ['name' => 'الولايات المتحدة', 'name_en' => 'USA', 'code' => '+1', 'flag' => '🇺🇸'],
+            ['name' => 'كندا', 'name_en' => 'Canada', 'code' => '+1', 'flag' => '🇨🇦'],
+            ['name' => 'بريطانيا', 'name_en' => 'United Kingdom', 'code' => '+44', 'flag' => '🇬🇧'],
+            ['name' => 'فرنسا', 'name_en' => 'France', 'code' => '+33', 'flag' => '🇫🇷'],
+            ['name' => 'ألمانيا', 'name_en' => 'Germany', 'code' => '+49', 'flag' => '🇩🇪'],
+            ['name' => 'إيطاليا', 'name_en' => 'Italy', 'code' => '+39', 'flag' => '🇮🇹'],
+            ['name' => 'إسبانيا', 'name_en' => 'Spain', 'code' => '+34', 'flag' => '🇪🇸'],
+            ['name' => 'البرتغال', 'name_en' => 'Portugal', 'code' => '+351', 'flag' => '🇵🇹'],
+            ['name' => 'هولندا', 'name_en' => 'Netherlands', 'code' => '+31', 'flag' => '🇳🇱'],
+            ['name' => 'بلجيكا', 'name_en' => 'Belgium', 'code' => '+32', 'flag' => '🇧🇪'],
+            ['name' => 'سويسرا', 'name_en' => 'Switzerland', 'code' => '+41', 'flag' => '🇨🇭'],
+            ['name' => 'النمسا', 'name_en' => 'Austria', 'code' => '+43', 'flag' => '🇦🇹'],
+            ['name' => 'السويد', 'name_en' => 'Sweden', 'code' => '+46', 'flag' => '🇸🇪'],
+            ['name' => 'النرويج', 'name_en' => 'Norway', 'code' => '+47', 'flag' => '🇳🇴'],
+            ['name' => 'الدنمارك', 'name_en' => 'Denmark', 'code' => '+45', 'flag' => '🇩🇰'],
+            ['name' => 'فنلندا', 'name_en' => 'Finland', 'code' => '+358', 'flag' => '🇫🇮'],
+            ['name' => 'أيرلندا', 'name_en' => 'Ireland', 'code' => '+353', 'flag' => '🇮🇪'],
+            ['name' => 'روسيا', 'name_en' => 'Russia', 'code' => '+7', 'flag' => '🇷🇺'],
+            ['name' => 'أوكرانيا', 'name_en' => 'Ukraine', 'code' => '+380', 'flag' => '🇺🇦'],
+            ['name' => 'بولندا', 'name_en' => 'Poland', 'code' => '+48', 'flag' => '🇵🇱'],
+            ['name' => 'اليونان', 'name_en' => 'Greece', 'code' => '+30', 'flag' => '🇬🇷'],
+            ['name' => 'أستراليا', 'name_en' => 'Australia', 'code' => '+61', 'flag' => '🇦🇺'],
+            ['name' => 'نيوزيلندا', 'name_en' => 'New Zealand', 'code' => '+64', 'flag' => '🇳🇿'],
+            ['name' => 'البرازيل', 'name_en' => 'Brazil', 'code' => '+55', 'flag' => '🇧🇷'],
+            ['name' => 'الأرجنتين', 'name_en' => 'Argentina', 'code' => '+54', 'flag' => '🇦🇷'],
+            ['name' => 'المكسيك', 'name_en' => 'Mexico', 'code' => '+52', 'flag' => '🇲🇽'],
+            ['name' => 'جنوب أفريقيا', 'name_en' => 'South Africa', 'code' => '+27', 'flag' => '🇿🇦'],
+            ['name' => 'نيجيريا', 'name_en' => 'Nigeria', 'code' => '+234', 'flag' => '🇳🇬'],
+            ['name' => 'كينيا', 'name_en' => 'Kenya', 'code' => '+254', 'flag' => '🇰🇪'],
+            ['name' => 'إثيوبيا', 'name_en' => 'Ethiopia', 'code' => '+251', 'flag' => '🇪🇹'],
+            ['name' => 'غانا', 'name_en' => 'Ghana', 'code' => '+233', 'flag' => '🇬🇭'],
+            ['name' => 'أفغانستان', 'name_en' => 'Afghanistan', 'code' => '+93', 'flag' => '🇦🇫'],
+            ['name' => 'سنغافورة', 'name_en' => 'Singapore', 'code' => '+65', 'flag' => '🇸🇬'],
+            ['name' => 'تايلاند', 'name_en' => 'Thailand', 'code' => '+66', 'flag' => '🇹🇭'],
+            ['name' => 'فيتنام', 'name_en' => 'Vietnam', 'code' => '+84', 'flag' => '🇻🇳'],
+        ];
+    }
+}
