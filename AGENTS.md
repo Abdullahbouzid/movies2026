@@ -29,6 +29,44 @@ Admin user: `admin@cinema.test` / `password`.
   (8 slots per movie per day)
 - `Booking` — booking_ref (`CP-XXXXXX`), movie/showtime/package, show_date, customer
   fields, price, payment_status, attendance_status
+- `Game` — name, slug (auto from name), icon (emoji), image, description, meta,
+  color_from/color_to (gradient, deterministic palette fallback), badge
+  (`trending`|`new`|`popular`), rating, ratings_count, sort_order, is_active
+- `GamePrice` — game_id, label (`30 دقيقة`|`ساعة`|`ساعتان`), minutes, price,
+  is_default, sort_order (durations + prices per game)
+- `PlayTime` — game_id, day_of_week (0=Sunday..6=Saturday), start_time, end_time,
+  is_active; `PlayTime::$dayNames` maps int → Arabic day
+- `GameBooking` — booking_ref (`GM-XXXXXX`), game/game_price, play_date,
+  duration_label/minutes (snapshot), price, customer fields, payment_status,
+  attendance_status; `qrPayload()` feeds the QR URL
+- `Tournament` — name, game_id, description, image, participants_count, format
+  (`knockout`|`league`|`groups`), status (`upcoming`|`open`|`drawn`|`running`|`finished`),
+  entry_fee, prize, starts_on, starts_at, drawn_at
+- `TournamentParticipant` — tournament_id, name, seed, is_bye
+- `TournamentMatch` — tournament_id, round, round_label, position, player_one_id,
+  player_two_id, scores, winner_id; `label()` → "playerOne × playerTwo"
+- `TournamentAnnouncement` — tournament_id, title, body, image, badge,
+  published_at, is_published; `published()` scope
+
+## Games system (public `/games` + admin)
+
+- Public `/games` is **DB-driven** (no longer the static `public/site/games.html`):
+  `GameController@index` builds a payload (games with prices + per-day play times,
+  week days, countries) printed as `window.GAMES`; `@book` stores a `GameBooking`
+  and returns JSON (`ok`, `reference`, `qr_url`, …) or redirects with `booked_ref`.
+- Views/assets: `resources/views/games/index.blade.php`, `public/css/games.css`,
+  `public/js/games.js` — ported from the original `games.html` design.
+- `app/Support/TournamentDraw.php` — single-elimination bracket builder: shuffles
+  participants, seeds them, pads to the nearest power of two with byes, and
+  auto-advances byes. Round labels: ربع النهائي / نصف النهائي / النهائي.
+- Filament resources: `Games` (with `PricesRelationManager` + `PlayTimesRelationManager`
+  tabs and a `prices` repeater in the form), `PlayTimes`, `GameBookings`,
+  `Tournaments` (with `ParticipantsRelationManager` + `MatchesRelationManager` and an
+  «إجراء القرعة» draw action), `TournamentAnnouncements`.
+- `GameSeeder` ports the original hardcoded games/tournament data; called from
+  `DatabaseSeeder` after `CinemaSeeder`.
+- Tests: `tests/Feature/GamesFlowTest.php` covers the public page, payload, booking
+  persistence/JSON, validation, draw bracket, announcement, and admin resource pages.
 
 ## Layout
 

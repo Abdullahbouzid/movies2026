@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\MovieController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,7 @@ Route::get('/tickets/{ref}', [MovieController::class, 'ticket'])->name('movies.t
 
 // Other interfaces keep their original static design.
 Route::get('/home', fn () => response()->file(public_path('site/index.html')))->name('site.home');
-Route::get('/games', fn () => response()->file(public_path('site/games.html')))->name('site.games');
+Route::get('/games', [GameController::class, 'index'])->name('site.games');
+Route::post('/games/{game}/book', [GameController::class, 'book'])->name('games.book');
 Route::get('/club', fn () => response()->file(public_path('site/club.html')))->name('site.club');
 Route::get('/cafe', fn () => response()->file(public_path('site/cafe.html')))->name('site.cafe');
