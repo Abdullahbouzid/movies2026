@@ -8,20 +8,31 @@ use App\Models\Movie;
 use App\Models\Package;
 use App\Models\Showtime;
 use App\Support\Countries;
+use App\Support\HeroShowcase;
+use App\Support\SeatAvailability;
+use App\Http\Controllers\Concerns\HandlesBookings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class MovieController extends Controller
 {
+    use HandlesBookings;
+
     public function index(Request $request): View
     {
+        $horizon = today()->addDays(6);
+
         $movies = Movie::query()
             ->available()
             ->with([
                 'genre',
                 'packages',
-                'showtimes' => fn ($q) => $q->orderBy('start_time'),
+                'showtimes' => fn ($q) => $q
+                    ->whereNotNull('show_date')
+                    ->whereBetween('show_date', [today()->toDateString(), $horizon->toDateString()])
+                    ->orderBy('start_time'),
             ])
             ->orderByDesc('rating')
             ->get();
@@ -44,6 +55,7 @@ class MovieController extends Controller
             'countries' => Countries::all(),
             'defaultCountry' => config('cinema.default_country', '+218'),
             'payload' => $this->payload($movies, $packages, $weekDays, $currentDay),
+            'showcase' => (new HeroShowcase())->movies($movies)->slides(),
         ]);
     }
 
@@ -52,15 +64,17 @@ class MovieController extends Controller
      *
      * @param  \Illuminate\Support\Collection<int, Movie>  $movies
      * @param  \Illuminate\Support\Collection<int, Package>  $packages
-     * @param  array<int, array{name:string, date:string, iso:string, dow:int, isToday:bool}>  $weekDays
+     * @param  array<int, array{name:string, nameAr:string, date:string, iso:string, dow:int, isToday:bool}>  $weekDays
      * @return array<string, mixed>
      */
     private function payload($movies, $packages, array $weekDays, int $currentDay): array
     {
+        $availability = SeatAvailability::weekGrid($movies, $weekDays);
 
         return [
             'currentDay' => $currentDay,
             'dayNames' => array_values(Showtime::$dayNames),
+            'dayNamesAr' => array_values(Showtime::$dayNamesAr),
             'weekDays' => $weekDays,
             'defaultCountry' => config('cinema.default_country', '+218'),
             'csrf' => csrf_token(),
@@ -74,13 +88,18 @@ class MovieController extends Controller
                 'seats' => $p->seats_count,
                 'isVip' => str_contains($p->name, 'VIP'),
             ])->values(),
-            'movies' => $movies->map(function (Movie $m) use ($weekDays) {
+            'movies' => $movies->map(function (Movie $m) use ($weekDays, $availability) {
                 $byDay = [];
                 foreach ($weekDays as $i => $day) {
                     $byDay[$i] = $m->showtimes
-                        ->where('day_of_week', $day['dow'])
+                        ->filter(fn ($s) => $s->show_date?->toDateString() === $day['iso'])
                         ->sortBy('start_time')
-                        ->map(fn ($s) => ['id' => $s->id, 'time' => $s->start_time_short])
+                        ->map(fn ($s) => [
+                            'id' => $s->id,
+                            'time' => $s->start_time_short,
+                            'end' => $s->end_time_short,
+                            'seatsLeft' => $availability[$m->id][$day['iso']][$s->id] ?? (int) $s->seats_capacity,
+                        ])
                         ->values()
                         ->all();
                 }
@@ -114,7 +133,14 @@ class MovieController extends Controller
     {
         abort_unless($movie->status === Movie::STATUS_AVAILABLE, 404);
 
-        $movie->load(['genre', 'packages', 'showtimes' => fn ($q) => $q->orderBy('day_of_week')->orderBy('start_time')]);
+        $movie->load([
+            'genre',
+            'packages',
+            'showtimes' => fn ($q) => $q->whereNotNull('show_date')
+                ->whereDate('show_date', '>=', today())
+                ->orderBy('show_date')
+                ->orderBy('start_time'),
+        ]);
 
         return view('movies.show', [
             'movie' => $movie,
@@ -145,38 +171,84 @@ class MovieController extends Controller
             ->where('movie_id', $movie->id)
             ->firstOrFail();
 
+        $showDate = \Illuminate\Support\Carbon::parse($data['show_date']);
+
+        if ($showtime->show_date && ! $showtime->show_date->isSameDay($showDate)) {
+            return $this->bookingFailed($request, ['showtime_id' => 'وقت العرض المختار لا يطابق التاريخ المحدد']);
+        }
+
+        if (! $showtime->show_date && (int) $showtime->day_of_week !== $showDate->dayOfWeek) {
+            return $this->bookingFailed($request, ['showtime_id' => 'وقت العرض المختار لا يطابق يوم التاريخ المحدد']);
+        }
+
+        if ($this->slotHasPassed($showDate->toDateString(), $showtime->start_time)) {
+            return $this->bookingFailed($request, ['showtime_id' => 'انتهى وقت هذا العرض، يرجى اختيار عرض آخر']);
+        }
+
         $price = $movie->priceForPackage((int) $data['package_id']);
         abort_if($price === null, 422, 'الباقة المختارة غير متاحة لهذا الفيلم');
 
-        $booking = Booking::create([
-            'booking_ref' => Booking::generateRef(),
-            'movie_id' => $movie->id,
-            'showtime_id' => $showtime->id,
-            'package_id' => $data['package_id'],
-            'show_date' => $data['show_date'],
-            'full_name' => $data['full_name'],
-            'birthdate' => $data['birthdate'],
-            'country_name' => $data['country_name'],
-            'country_code' => $data['country_code'],
-            'phone' => $data['phone'],
-            'whatsapp_country_code' => $data['whatsapp_country_code'],
-            'whatsapp' => $data['whatsapp'],
-            'price' => $price,
-            'payment_status' => Booking::PAYMENT_PENDING,
-            'attendance_status' => Booking::ATTENDANCE_PENDING,
-        ]);
+        $package = Package::find($data['package_id']);
+        $seats = max(1, (int) $package->seats_count);
+
+        if (! SeatAvailability::hasRoomFor($showtime, $data['show_date'], $seats)) {
+            return $this->bookingFailed($request, [
+                'showtime_id' => 'لا توجد مقاعد كافية في هذا العرض، يرجى اختيار وقت آخر',
+            ]);
+        }
+
+        $booking = DB::transaction(function () use ($movie, $showtime, $data, $price, $seats) {
+            // Re-check inside the transaction so two simultaneous requests cannot
+            // both pass the capacity check and oversell the showing.
+            $showtime = Showtime::query()->lockForUpdate()->find($showtime->id);
+
+            if (! SeatAvailability::hasRoomFor($showtime, $data['show_date'], $seats)) {
+                return null;
+            }
+
+            $booking = Booking::create([
+                'booking_ref' => Booking::generateRef(),
+                'movie_id' => $movie->id,
+                'showtime_id' => $showtime->id,
+                'package_id' => $data['package_id'],
+                'seats' => $seats,
+                'show_date' => $data['show_date'],
+                'full_name' => $data['full_name'],
+                'birthdate' => $data['birthdate'],
+                'country_name' => $data['country_name'],
+                'country_code' => $data['country_code'],
+                'phone' => $data['phone'],
+                'whatsapp_country_code' => $data['whatsapp_country_code'],
+                'whatsapp' => $data['whatsapp'],
+                'price' => $price,
+                'payment_status' => Booking::PAYMENT_PENDING,
+                'attendance_status' => Booking::ATTENDANCE_PENDING,
+            ]);
+
+            $booking->ensureQr();
+
+            return $booking;
+        });
+
+        if (! $booking) {
+            return $this->bookingFailed($request, [
+                'showtime_id' => 'لا توجد مقاعد كافية في هذا العرض، يرجى اختيار وقت آخر',
+            ]);
+        }
 
         if ($request->expectsJson()) {
             return response()->json([
                 'ok' => true,
                 'reference' => $booking->booking_ref,
                 'ticket_url' => route('movies.ticket', $booking->booking_ref),
-                'qr_url' => $this->qrUrl($booking),
+                'qr_url' => $booking->qrUrl(),
                 'package' => $booking->package->name,
+                'seats' => $booking->seats,
                 'price' => (float) $booking->price,
                 'movie' => $movie->name,
                 'showtime' => $showtime->start_time_short,
                 'show_date' => $booking->show_date->format('Y-m-d'),
+                'whatsapp_url' => $booking->whatsappUrl(),
             ]);
         }
 
@@ -191,15 +263,12 @@ class MovieController extends Controller
             ->where('booking_ref', $ref)
             ->firstOrFail();
 
+        $booking->ensureQr();
+
         return view('movies.ticket', [
             'booking' => $booking,
-            'qrUrl' => $this->qrUrl($booking),
+            'qrUrl' => $booking->qrUrl(),
         ]);
-    }
-
-    private function qrUrl(Booking $booking): string
-    {
-        return 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' . urlencode($booking->qrPayload());
     }
 
     /**
@@ -215,32 +284,8 @@ class MovieController extends Controller
     }
 
     /**
-     * @return array<int, array{name:string, date:string, iso:string, dow:int, isToday:bool}>
+     * Day labels are English (Sunday, Monday, ...) with a numeric d/m/Y date.
+     *
+     * @return array<int, array{name:string, nameAr:string, date:string, iso:string, dow:int, isToday:bool}>
      */
-    private function weekDays(): array
-    {
-        $dayNames = Showtime::$dayNames;
-        $days = [];
-
-        for ($i = 0; $i < 7; $i++) {
-            $date = now()->addDays($i);
-            $days[] = [
-                'name' => $dayNames[$date->dayOfWeek],
-                'date' => $date->day . ' ' . $this->monthName($date->month),
-                'iso' => $date->format('Y-m-d'),
-                'dow' => $date->dayOfWeek,
-                'isToday' => $i === 0,
-            ];
-        }
-
-        return $days;
-    }
-
-    private function monthName(int $month): string
-    {
-        return [
-            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل', 5 => 'مايو', 6 => 'يونيو',
-            7 => 'يوليو', 8 => 'أغسطس', 9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر',
-        ][$month] ?? '';
-    }
 }

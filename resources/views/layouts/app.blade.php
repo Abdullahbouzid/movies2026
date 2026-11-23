@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'سينما بلاس')</title>
+@hasSection('meta')
+@yield('meta')
+@endif
+<meta name="robots" content="@yield('robots', 'index,follow')">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
@@ -42,6 +46,7 @@ footer{margin-top:70px;padding:34px 0;border-top:1px solid var(--line);color:var
 .alert-error{background:rgba(231,29,36,.08);color:#b3121a;border:1px solid rgba(231,29,36,.25)}
 .alert-success{background:rgba(16,150,90,.09);color:#0f7a4a;border:1px solid rgba(16,150,90,.25)}
 </style>
+@stack('head')
 @stack('styles')
 </head>
 <body>

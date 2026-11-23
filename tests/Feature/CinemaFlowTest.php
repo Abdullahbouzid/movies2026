@@ -25,7 +25,9 @@ class CinemaFlowTest extends TestCase
         ]);
         $movie->packages()->attach($package->id, ['price' => 35]);
         $showtime = Showtime::create([
-            'movie_id' => $movie->id, 'day_of_week' => now()->dayOfWeek,
+            'movie_id' => $movie->id,
+            'show_date' => now()->toDateString(),
+            'day_of_week' => now()->dayOfWeek,
             'start_time' => '11:30', 'end_time' => '13:50',
         ]);
 

@@ -26,6 +26,11 @@ class BookingForm
                             ->label('تاريخ العرض')
                             ->disabled()
                             ->dehydrated(false),
+                        Select::make('branch_id')
+                            ->label('الفرع')
+                            ->relationship('branch', 'name')
+                            ->searchable()
+                            ->preload(),
                         Select::make('movie_id')
                             ->label('الفيلم')
                             ->relationship('movie', 'name')

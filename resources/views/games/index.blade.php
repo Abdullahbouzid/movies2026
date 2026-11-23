@@ -12,10 +12,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>سينما بلاس | صالة الألعاب</title>
+@include('partials.meta', [
+    'title' => 'سينما بلاس | صالة الألعاب',
+    'description' => 'احجز جلسة لعب في صالة سينما بلاس: بولينج، بلايستيشن، بلياردو وأكثر — أسعار بالساعة، أوقات متاحة يوميًا، وحجز مؤكد برمز QR.',
+])
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/games.css') }}">
+<link rel="stylesheet" href="@versioned('css/games.css')">
+<link rel="stylesheet" href="@versioned('css/hero-showcase.css')">
 </head>
 <body data-page="games">
 
@@ -81,6 +86,16 @@
       </div>
     </div>
   </section>
+
+  <!-- ════════ SHOWCASE ════════ -->
+  <div class="container">
+    @include('partials.hero-showcase', [
+      'slides' => $showcase,
+      'accent' => '#0ea5e9',
+      'label' => 'أجهزة جاهزة للتحدّي',
+      'heading' => 'تعرّف على أجهزتنا',
+    ])
+  </div>
 
   <!-- ════════ TICKER ════════ -->
   <div class="ticker">
@@ -151,7 +166,7 @@
             </div>
             <div class="extra-card-footer">
               <div class="extra-price">
-                {{ $from !== null ? $from . ' ﷼' : '—' }}
+                {{ $from !== null ? $from . ' د.ل' : '—' }}
                 <small>{{ $default ? 'لكل ' . $default->label : '' }}</small>
               </div>
               <button class="extra-book-btn" onclick="openGameBooking({{ $game->id }})">
@@ -269,6 +284,17 @@
         </div>
 
         <div class="field-modal">
+          <label>اليوم <span class="req">*</span></label>
+          <div class="slot-days" id="slotDays"></div>
+        </div>
+
+        <div class="field-modal">
+          <label>وقت اللعب <span class="req">*</span></label>
+          <div class="slot-times" id="slotTimes"></div>
+          <p class="slot-hint" id="slotHint">اختر يومًا لعرض الأوقات المتاحة</p>
+        </div>
+
+        <div class="field-modal">
           <label>مدة الجلسة <span class="req">*</span></label>
           <div class="duration-grid" id="durationGrid"></div>
         </div>
@@ -308,7 +334,7 @@
 
         <div class="total-row">
           <span class="total-label">المجموع الكلي<small id="totalSubLabel">—</small></span>
-          <strong id="totalPrice">0 <small>﷼</small></strong>
+          <strong id="totalPrice">0 <small>د.ل</small></strong>
         </div>
 
         <button type="submit" class="btn btn-gold submit-btn">
@@ -322,7 +348,7 @@
       <div class="success-state">
         <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h3>تم تأكيد الحجز بنجاح!</h3>
-        <p id="successMessage">سيتم إرسال تفاصيل الحجز إلى رقم الواتساب المُدخل.</p>
+        <p id="successMessage">احفظ رقم الحجز أو أرسله على واتساب — وسيتم التواصل معك لتأكيد الدفع.</p>
         <div class="qr-ticket">
           <div class="qr-ticket-header"><span>رقم الحجز</span><strong id="bookingRef">GM-000000</strong></div>
           <div class="qr-ticket-body"><img id="qrImage" alt="رمز QR" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23f4f4f6'/></svg>"></div>
@@ -339,7 +365,22 @@
   </div>
 </div>
 
+<style>
+.slot-days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.slot-day{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 14px;font-family:inherit;font-weight:800;font-size:12.5px;color:var(--text);cursor:pointer;text-align:center;line-height:1.35;transition:.18s}
+.slot-day small{display:block;font-weight:700;font-size:11px;color:var(--muted);margin-top:2px}
+.slot-day.active{background:linear-gradient(135deg,var(--red),var(--red-2));color:#fff;border-color:transparent}
+.slot-day.active small{color:rgba(255,255,255,.8)}
+.slot-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.slot-time{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:10px 8px;font-family:inherit;font-weight:800;font-size:12.5px;color:var(--text);cursor:pointer;transition:.18s}
+.slot-time small{display:block;font-weight:700;font-size:10.5px;color:var(--muted);margin-top:3px}
+.slot-time.active{background:linear-gradient(135deg,var(--red),var(--red-2));color:#fff;border-color:transparent}
+.slot-time.active small{color:rgba(255,255,255,.82)}
+.slot-time:disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.slot-hint{font-size:11.5px;color:var(--muted);font-weight:700;margin:8px 0 0}
+</style>
 <script>window.GAMES = @json($payload);</script>
-<script src="{{ asset('js/games.js') }}"></script>
+<script src="@versioned('js/hero-showcase.js')"></script>
+<script src="@versioned('js/games.js')"></script>
 </body>
 </html>

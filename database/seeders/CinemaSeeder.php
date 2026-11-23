@@ -7,6 +7,7 @@ use App\Models\Movie;
 use App\Models\Package;
 use App\Models\Showtime;
 use App\Models\User;
+use App\Support\PosterFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -74,6 +75,8 @@ class CinemaSeeder extends Seeder
                 'image' => 'movies/movie-' . ($i + 1) . '.jpg',
             ]);
 
+            PosterFactory::make($movie->image, $data['g1'], $data['g2']);
+
             foreach ($packages as $pi => $package) {
                 $movie->packages()->attach($package->id, [
                     'price' => $data['base'] + ($pi * 25),
@@ -81,13 +84,20 @@ class CinemaSeeder extends Seeder
             }
 
             if ($data['status'] === 'available') {
-                foreach (range(0, 6) as $day) {
-                    foreach ($timePool as $t) {
+                // Dated showtimes covering the configured rolling horizon so the
+                // public week grid is never empty; `showtimes:generate` keeps it topped up.
+                $horizon = max(6, (int) config('cinema.schedule_horizon_days', 14));
+                foreach (range(0, $horizon - 1) as $offset) {
+                    $date = now()->addDays($offset);
+
+                    foreach ($timePool as $ti => $t) {
                         Showtime::create([
                             'movie_id' => $movie->id,
-                            'day_of_week' => $day,
+                            'show_date' => $date->toDateString(),
+                            'day_of_week' => $date->dayOfWeek,
                             'start_time' => $t[0],
                             'end_time' => $t[1],
+                            'seats_capacity' => 40 + (($i + $ti) % 4) * 20,
                         ]);
                     }
                 }

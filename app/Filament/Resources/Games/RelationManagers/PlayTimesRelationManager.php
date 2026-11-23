@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Games\RelationManagers;
 
 use App\Models\PlayTime;
+use App\Rules\PlayTimeConflictRule;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -35,16 +37,32 @@ class PlayTimesRelationManager extends RelationManager
                 Select::make('day_of_week')
                     ->label('اليوم')
                     ->options(PlayTime::$dayNames)
+                    ->live()
                     ->required(),
                 TimePicker::make('start_time')
                     ->label('وقت البداية')
                     ->seconds(false)
+                    ->live()
                     ->required(),
                 TimePicker::make('end_time')
                     ->label('وقت النهاية')
                     ->seconds(false)
+                    ->live()
                     ->required()
-                    ->after('start_time'),
+                    ->after('start_time')
+                    ->rule(function (Get $get, $livewire) {
+                        $mountedAction = $livewire->getMountedAction();
+                        $record = method_exists($mountedAction, 'getRecord')
+                            ? $mountedAction->getRecord()
+                            : null;
+
+                        return new PlayTimeConflictRule(
+                            gameId: $livewire->getOwnerRecord()->getKey(),
+                            dayOfWeek: $get('day_of_week'),
+                            startTime: $get('start_time'),
+                            ignoreId: $record?->getKey(),
+                        );
+                    }),
                 Toggle::make('is_active')
                     ->label('مُفعّل')
                     ->default(true),

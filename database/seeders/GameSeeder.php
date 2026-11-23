@@ -14,12 +14,12 @@ class GameSeeder extends Seeder
     public function run(): void
     {
         $games = [
-            ['name' => 'PlayStation 5', 'icon' => '🎮', 'meta' => 'أحدث جهاز ألعاب • شاشة 4K', 'c1' => '#eb1e23', 'c2' => '#8b1115', 'badge' => 'trending', 'rating' => 4.9, 'votes' => 120, 'prices' => [[30, 15], [60, 25], [120, 45]]],
-            ['name' => 'تجربة الواقع الافتراضي', 'icon' => '🥽', 'meta' => 'انغماس كامل • سماعات 3D', 'c1' => '#0f766e', 'c2' => '#22d3ee', 'badge' => 'new', 'rating' => 4.8, 'votes' => 85, 'prices' => [[30, 40], [60, 70]]],
-            ['name' => 'بلياردو', 'icon' => '🎱', 'meta' => 'طاولات احترافية • مضارب عالية الجودة', 'c1' => '#92400e', 'c2' => '#f59e0b', 'badge' => 'popular', 'rating' => 4.6, 'votes' => 95, 'prices' => [[30, 12], [60, 20], [120, 35]]],
-            ['name' => 'Foosball', 'icon' => '⚽', 'meta' => 'تحدي أصدقاء • كرة طاولة', 'c1' => '#1e3a8a', 'c2' => '#3b82f6', 'badge' => null, 'rating' => 4.5, 'votes' => 70, 'prices' => [[30, 10], [60, 15]]],
-            ['name' => 'محاكي سباق', 'icon' => '🏎️', 'meta' => 'عجلة قيادة • شاشة منحنية', 'c1' => '#4c1d95', 'c2' => '#a855f7', 'badge' => 'trending', 'rating' => 4.9, 'votes' => 110, 'prices' => [[30, 35], [60, 60]]],
-            ['name' => 'سهام إلكترونية', 'icon' => '🎯', 'meta' => 'حساب نقاط تلقائي • لوحات Dart', 'c1' => '#9f1239', 'c2' => '#fb7185', 'badge' => null, 'rating' => 4.4, 'votes' => 60, 'prices' => [[30, 11], [60, 18]]],
+            ['name' => 'PlayStation 5', 'icon' => '🎮', 'meta' => 'أحدث جهاز ألعاب • شاشة 4K', 'c1' => '#eb1e23', 'c2' => '#8b1115', 'badge' => 'trending', 'rating' => 4.9, 'votes' => 120, 'devices' => 4, 'prices' => [[30, 15], [60, 25], [120, 45]]],
+            ['name' => 'تجربة الواقع الافتراضي', 'icon' => '🥽', 'meta' => 'انغماس كامل • سماعات 3D', 'c1' => '#0f766e', 'c2' => '#22d3ee', 'badge' => 'new', 'rating' => 4.8, 'votes' => 85, 'devices' => 2, 'prices' => [[30, 40], [60, 70]]],
+            ['name' => 'بلياردو', 'icon' => '🎱', 'meta' => 'طاولات احترافية • مضارب عالية الجودة', 'c1' => '#92400e', 'c2' => '#f59e0b', 'badge' => 'popular', 'rating' => 4.6, 'votes' => 95, 'devices' => 3, 'prices' => [[30, 12], [60, 20], [120, 35]]],
+            ['name' => 'Foosball', 'icon' => '⚽', 'meta' => 'تحدي أصدقاء • كرة طاولة', 'c1' => '#1e3a8a', 'c2' => '#3b82f6', 'badge' => null, 'rating' => 4.5, 'votes' => 70, 'devices' => 2, 'prices' => [[30, 10], [60, 15]]],
+            ['name' => 'محاكي سباق', 'icon' => '🏎️', 'meta' => 'عجلة قيادة • شاشة منحنية', 'c1' => '#4c1d95', 'c2' => '#a855f7', 'badge' => 'trending', 'rating' => 4.9, 'votes' => 110, 'devices' => 2, 'prices' => [[30, 35], [60, 60]]],
+            ['name' => 'سهام إلكترونية', 'icon' => '🎯', 'meta' => 'حساب نقاط تلقائي • لوحات Dart', 'c1' => '#9f1239', 'c2' => '#fb7185', 'badge' => null, 'rating' => 4.4, 'votes' => 60, 'devices' => 2, 'prices' => [[30, 11], [60, 18]]],
         ];
 
         $playSlots = [
@@ -46,6 +46,7 @@ class GameSeeder extends Seeder
                 'ratings_count' => $data['votes'],
                 'sort_order' => $i + 1,
                 'is_active' => true,
+                'devices_count' => $data['devices'],
             ]);
 
             foreach ($data['prices'] as $index => [$minutes, $price]) {
@@ -58,6 +59,7 @@ class GameSeeder extends Seeder
                 ]);
             }
 
+            // Every station is bookable all week, in the fixed two-hour blocks.
             foreach (range(0, 6) as $day) {
                 foreach ($playSlots as $slot) {
                     $game->playTimes()->create([

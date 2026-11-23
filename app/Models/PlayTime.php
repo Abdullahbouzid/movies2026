@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\PlayTimeConflict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 class PlayTime extends Model
 {
@@ -14,7 +16,41 @@ class PlayTime extends Model
         'is_active' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $slot): void {
+            $clash = PlayTimeConflict::clash(
+                (int) $slot->game_id,
+                (int) $slot->day_of_week,
+                $slot->start_time,
+                $slot->end_time,
+                $slot->getKey(),
+            );
+
+            if ($clash) {
+                throw ValidationException::withMessages([
+                    'end_time' => sprintf(
+                        'يتعارض هذا الوقت مع وقت آخر لنفس اللعبة (%s - %s).',
+                        $clash->start_time_short,
+                        $clash->end_time_short,
+                    ),
+                ]);
+            }
+        });
+    }
+
+    /** Public schedule labels are English per the cinema's request. */
     public static array $dayNames = [
+        0 => 'Sunday',
+        1 => 'Monday',
+        2 => 'Tuesday',
+        3 => 'Wednesday',
+        4 => 'Thursday',
+        5 => 'Friday',
+        6 => 'Saturday',
+    ];
+
+    public static array $dayNamesAr = [
         0 => 'الأحد',
         1 => 'الاثنين',
         2 => 'الثلاثاء',

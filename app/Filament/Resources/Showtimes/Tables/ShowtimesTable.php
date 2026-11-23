@@ -23,6 +23,11 @@ class ShowtimesTable
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
+                TextColumn::make('show_date')
+                    ->label('التاريخ')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->weight('bold'),
                 TextColumn::make('day_of_week')
                     ->label('اليوم')
                     ->badge()
@@ -36,11 +41,19 @@ class ShowtimesTable
                     ->label('النهاية')
                     ->time('H:i')
                     ->sortable(),
+                TextColumn::make('seats_capacity')
+                    ->label('السعة')
+                    ->numeric()
+                    ->sortable()
+                    ->alignCenter(),
             ])
             ->defaultGroup(
-                Group::make('day_of_week')
-                    ->label('اليوم')
-                    ->getTitleFromRecordUsing(fn ($record) => Showtime::$dayNames[$record->day_of_week] ?? ''),
+                Group::make('show_date')
+                    ->label('التاريخ')
+                    ->getTitleFromRecordUsing(fn ($record) => $record->show_date
+                        ? $record->show_date->format('l d/m/Y')
+                        : 'بدون تاريخ')
+                    ->orderQueryUsing(fn ($query, $direction) => $query->orderBy('show_date', $direction)),
             )
             ->filters([
                 SelectFilter::make('movie_id')
@@ -49,6 +62,17 @@ class ShowtimesTable
                 SelectFilter::make('day_of_week')
                     ->label('اليوم')
                     ->options(Showtime::$dayNames),
+                \Filament\Tables\Filters\Filter::make('show_date')
+                    ->label('التاريخ')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')->label('من'),
+                        \Filament\Forms\Components\DatePicker::make('to')->label('إلى'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'] ?? null, fn ($q, $d) => $q->whereDate('show_date', '>=', $d))
+                            ->when($data['to'] ?? null, fn ($q, $d) => $q->whereDate('show_date', '<=', $d));
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -59,6 +83,6 @@ class ShowtimesTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('start_time');
+            ->defaultSort('show_date', 'asc');
     }
 }

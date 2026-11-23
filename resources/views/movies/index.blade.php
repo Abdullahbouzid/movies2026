@@ -5,10 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>سينما بلاس | الأفلام</title>
+@include('partials.meta', [
+    'title' => 'سينما بلاس | الأفلام وأوقات العرض',
+    'description' => 'احجز تذاكر أفلام سينما بلاس: قائمة الأفلام الحالية والقادمة، أوقات العرض اليومية، وباقات التذاكر العادية وVIP مع تأكيد فوري ورمز QR للدخول.',
+])
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/movies.css') }}">
+<link rel="stylesheet" href="@versioned('css/movies.css')">
+<link rel="stylesheet" href="@versioned('css/hero-showcase.css')">
 </head>
 <body data-page="movies">
 
@@ -74,6 +79,16 @@
       </div>
     </div>
   </section>
+
+  <!-- ════════ SHOWCASE ════════ -->
+  <div class="container">
+    @include('partials.hero-showcase', [
+      'slides' => $showcase,
+      'accent' => '#e71d24',
+      'label' => 'في صالاتنا الآن',
+      'heading' => 'أفلام تُعرض هذا الأسبوع',
+    ])
+  </div>
 
   <!-- ════════ TICKER ════════ -->
   <div class="ticker">
@@ -212,9 +227,9 @@
 
 <!-- ════════ نافذة الحجز ════════ -->
 <div class="modal-overlay" id="bookingModal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-header">
-      <button class="modal-close" onclick="closeBooking()" aria-label="إغلاق">×</button>
+      <button class="modal-close" type="button" onclick="closeBooking()" aria-label="إغلاق">×</button>
       <div class="modal-poster" id="modalPoster"></div>
       <div class="modal-title-wrap">
         <h3 id="modalTitle">—</h3>
@@ -223,73 +238,135 @@
       </div>
     </div>
 
+    <!-- شريط الخطوات -->
+    <ol class="steps" id="bookingSteps">
+      <li class="step is-active" data-step="1">
+        <span class="step-dot">1</span>
+        <span class="step-name">التذكرة</span>
+      </li>
+      <li class="step" data-step="2">
+        <span class="step-dot">2</span>
+        <span class="step-name">بياناتك</span>
+      </li>
+      <li class="step" data-step="3">
+        <span class="step-dot">3</span>
+        <span class="step-name">التأكيد</span>
+      </li>
+    </ol>
+
     <div class="modal-body" id="modalBody">
-      <div class="ticket-tabs" id="ticketTabs"></div>
-
-      <div class="vip-perks" id="vipPerks">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span>تذكرة VIP تشمل المشروبات والفشار مجانًا 🍿🥤</span>
-      </div>
-
       <form id="bookingForm" onsubmit="submitBooking(event)" novalidate>
 
-        <div class="field-modal movie-field">
-          <label>اختر الفيلم <span class="req">*</span></label>
-          <select id="modalMovie" onchange="onMovieChange()" required></select>
-        </div>
-
-        <div class="field-modal">
-          <label>وقت العرض <span class="req">*</span></label>
-          <select id="modalShowtime" required></select>
-        </div>
-
-        <div class="field-modal">
-          <label>الاسم الثلاثي <span class="req">*</span></label>
-          <input type="text" id="fullName" placeholder="مثال: محمد أحمد العلي" required>
-        </div>
-
-        <div class="field-modal">
-          <label>تاريخ الميلاد <span class="req">*</span></label>
-          <input type="date" id="birthdate" required>
-        </div>
-
-        <div class="field-modal">
-          <label>رقم الهاتف <span class="req">*</span></label>
-          <div class="phone-input">
-            <div class="country-select" id="phoneCountrySelect">
-              <button type="button" class="country-btn" onclick="toggleCountryDropdown('phoneCountrySelect')">
-                <span class="flag">🇱🇾</span><span class="code-text">{{ config('cinema.default_country') }}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'phoneCountryList')"></div><div class="country-list" id="phoneCountryList"></div></div>
-            </div>
-            <input type="tel" id="phoneNumber" placeholder="91 345 6789" required>
+        <!-- ── الخطوة ١: اختيار التذكرة ── -->
+        <section class="step-panel is-active" data-panel="1">
+          <div class="field-modal movie-field">
+            <label for="modalMovie">اختر الفيلم <span class="req">*</span></label>
+            <select id="modalMovie" onchange="onMovieChange()" required></select>
           </div>
-        </div>
 
-        <div class="field-modal">
-          <label>رقم الواتساب <span class="req">*</span></label>
-          <div class="phone-input">
-            <div class="country-select" id="whatsappCountrySelect">
-              <button type="button" class="country-btn" onclick="toggleCountryDropdown('whatsappCountrySelect')">
-                <span class="flag">🇱🇾</span><span class="code-text">{{ config('cinema.default_country') }}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'whatsappCountryList')"></div><div class="country-list" id="whatsappCountryList"></div></div>
-            </div>
-            <input type="tel" id="whatsappNumber" placeholder="91 345 6789" required>
+          <div class="field-modal">
+            <label for="modalShowtime">وقت العرض <span class="req">*</span></label>
+            <select id="modalShowtime" required></select>
           </div>
-        </div>
 
-        <div class="total-row">
-          <span class="total-label">المجموع الكلي<small id="totalSubLabel"></small></span>
-          <strong id="totalPrice">— <small>﷼</small></strong>
-        </div>
+          <div class="section-label">
+            <span>نوع التذكرة</span>
+            <small>اختر الباقة المناسبة</small>
+          </div>
+          <div class="ticket-tabs" id="ticketTabs"></div>
 
-        <button type="submit" class="btn btn-gold submit-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          تأكيد الحجز
-        </button>
+          <div class="vip-perks" id="vipPerks">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>تذكرة VIP تشمل المشروبات والفشار مجانًا 🍿🥤</span>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn btn-gold step-next" data-goto="2">
+              متابعة إلى بياناتك
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- ── الخطوة ٢: بيانات العميل ── -->
+        <section class="step-panel" data-panel="2">
+          <div class="field-modal">
+            <label for="fullName">الاسم الثلاثي <span class="req">*</span></label>
+            <input type="text" id="fullName" placeholder="مثال: محمد أحمد العلي" autocomplete="name" required>
+          </div>
+
+          <div class="field-modal">
+            <label for="birthdate">تاريخ الميلاد <span class="req">*</span></label>
+            <input type="date" id="birthdate" required>
+          </div>
+
+          <div class="field-modal">
+            <label for="phoneNumber">رقم الهاتف <span class="req">*</span></label>
+            <div class="phone-input">
+              <div class="country-select" id="phoneCountrySelect">
+                <button type="button" class="country-btn" onclick="toggleCountryDropdown('phoneCountrySelect')">
+                  <span class="flag">🇱🇾</span><span class="code-text">{{ config('cinema.default_country') }}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'phoneCountryList')"></div><div class="country-list" id="phoneCountryList"></div></div>
+              </div>
+              <input type="tel" id="phoneNumber" placeholder="91 345 6789" autocomplete="tel" required>
+            </div>
+          </div>
+
+          <div class="field-modal">
+            <label for="whatsappNumber">رقم الواتساب <span class="req">*</span></label>
+            <div class="phone-input">
+              <div class="country-select" id="whatsappCountrySelect">
+                <button type="button" class="country-btn" onclick="toggleCountryDropdown('whatsappCountrySelect')">
+                  <span class="flag">🇱🇾</span><span class="code-text">{{ config('cinema.default_country') }}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'whatsappCountryList')"></div><div class="country-list" id="whatsappCountryList"></div></div>
+              </div>
+              <input type="tel" id="whatsappNumber" placeholder="91 345 6789" required>
+            </div>
+          </div>
+
+          <label class="same-phone">
+            <input type="checkbox" id="sameAsPhone" onchange="copyPhoneToWhatsapp(this)">
+            <span>رقم الواتساب نفسه رقم الهاتف</span>
+          </label>
+
+          <div class="step-nav step-nav-split">
+            <button type="button" class="btn btn-ghost step-back" data-goto="1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              رجوع
+            </button>
+            <button type="button" class="btn btn-gold step-next" data-goto="3">مراجعة الحجز</button>
+          </div>
+        </section>
+
+        <!-- ── الخطوة ٣: المراجعة والتأكيد ── -->
+        <section class="step-panel" data-panel="3">
+          <div class="review-card" id="reviewCard"></div>
+
+          <div class="total-row">
+            <span class="total-label">المجموع الكلي<small id="totalSubLabel"></small></span>
+            <strong id="totalPrice">— <small>د.ل</small></strong>
+          </div>
+
+          <p class="review-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            الدفع عند الحضور. سيصلك رمز QR لتأكيد الحجز.
+          </p>
+
+          <div class="step-nav step-nav-split">
+            <button type="button" class="btn btn-ghost step-back" data-goto="2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              رجوع
+            </button>
+            <button type="submit" class="btn btn-gold submit-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              تأكيد الحجز
+            </button>
+          </div>
+        </section>
       </form>
     </div>
 
@@ -298,7 +375,7 @@
       <div class="success-state">
         <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
         <h3>تم تأكيد الحجز بنجاح!</h3>
-        <p id="successMessage">سيتم إرسال تفاصيل التذكرة إلى رقم الواتساب المُدخل.</p>
+        <p id="successMessage">احفظ رقم الحجز أو أرسل التذكرة على واتساب — وسيتم التواصل معك لتأكيد الدفع.</p>
         <div class="qr-ticket">
           <div class="qr-ticket-header"><span>رقم الحجز</span><strong id="bookingRef">CP-000000</strong></div>
           <div class="qr-ticket-body"><img id="qrImage" alt="رمز QR" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23f4f4f6'/></svg>"></div>
@@ -310,6 +387,7 @@
           </div>
         </div>
         <a class="btn btn-ghost" id="ticketLink" href="#" style="width:100%;justify-content:center;margin-bottom:10px">عرض التذكرة / طباعة</a>
+        <a class="btn btn-whatsapp" id="whatsappLink" href="#" target="_blank" rel="noopener" style="width:100%;justify-content:center;margin-bottom:10px;display:none">إرسال التذكرة على واتساب</a>
         <button type="button" class="btn btn-gold" onclick="closeBooking()">تم، حفظت التذكرة</button>
       </div>
     </div>
@@ -319,6 +397,7 @@
 <script>
 window.CINEMA = @json($payload);
 </script>
-<script src="{{ asset('js/movies.js') }}"></script>
+<script src="@versioned('js/hero-showcase.js')"></script>
+<script src="@versioned('js/movies.js')"></script>
 </body>
 </html>

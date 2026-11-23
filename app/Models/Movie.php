@@ -13,7 +13,7 @@ class Movie extends Model
     public const STATUS_COMING_SOON = 'coming_soon';
 
     protected $fillable = [
-        'name', 'image', 'poster_from', 'poster_to', 'accent_icon', 'genre_id', 'description',
+        'name', 'image', 'video', 'trailer_url', 'poster_from', 'poster_to', 'accent_icon', 'genre_id', 'description',
         'duration', 'rating', 'ratings_count', 'age_rating', 'status', 'badge', 'release_date',
     ];
 
@@ -102,6 +102,11 @@ class Movie extends Model
         ];
 
         return $palette[$this->id % count($palette)];
+    }
+
+    public function videoUrl(): ?string
+    {
+        return $this->video ? asset('storage/' . $this->video) : $this->trailer_url;
     }
 
     public function stars(): string

@@ -5,7 +5,10 @@ namespace App\Filament\Resources\Packages\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 
 class PackagesTable
@@ -21,7 +24,8 @@ class PackagesTable
                 TextColumn::make('seats_count')
                     ->label('عدد المقاعد')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('إجمالي المقاعد')),
                 TextColumn::make('includes')
                     ->label('ماذا تشمل')
                     ->limit(60)
@@ -29,7 +33,19 @@ class PackagesTable
                 TextColumn::make('movies_count')
                     ->label('عدد الأفلام')
                     ->counts('movies')
-                    ->badge(),
+                    ->badge()
+                    ->summarize(Sum::make()->label('الإجمالي')),
+            ])
+            ->filters([
+                Filter::make('seats')
+                    ->label('عدد المقاعد')
+                    ->form([
+                        TextInput::make('min')->label('من')->numeric(),
+                        TextInput::make('max')->label('إلى')->numeric(),
+                    ])
+                    ->query(fn ($query, array $data) => $query
+                        ->when($data['min'] ?? null, fn ($q, $v) => $q->where('seats_count', '>=', $v))
+                        ->when($data['max'] ?? null, fn ($q, $v) => $q->where('seats_count', '<=', $v))),
             ])
             ->recordActions([
                 EditAction::make(),

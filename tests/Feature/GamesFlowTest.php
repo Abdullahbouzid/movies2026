@@ -30,14 +30,14 @@ class GamesFlowTest extends TestCase
         $cheap = $game->prices()->create(['label' => '30 دقيقة', 'minutes' => 30, 'price' => 15, 'is_default' => true, 'sort_order' => 1]);
         $game->prices()->create(['label' => 'ساعة', 'minutes' => 60, 'price' => 25, 'sort_order' => 2]);
 
-        $game->playTimes()->create([
+        $slot = $game->playTimes()->create([
             'day_of_week' => now()->dayOfWeek,
             'start_time' => '12:00',
             'end_time' => '14:00',
             'is_active' => true,
         ]);
 
-        return [$game, $cheap];
+        return [$game, $cheap, $slot];
     }
 
     public function test_games_page_renders_from_database(): void
@@ -81,10 +81,11 @@ class GamesFlowTest extends TestCase
 
     public function test_booking_creates_pending_record_with_reference(): void
     {
-        [$game, $price] = $this->seedGame();
+        [$game, $price, $slot] = $this->seedGame();
 
         $response = $this->post("/games/{$game->id}/book", [
             'game_price_id' => $price->id,
+            'play_time_id' => $slot->id,
             'play_date' => now()->toDateString(),
             'full_name' => 'أحمد محمد علي',
             'country_code' => '+218',
@@ -107,10 +108,11 @@ class GamesFlowTest extends TestCase
 
     public function test_booking_returns_json_with_qr_when_requested(): void
     {
-        [$game, $price] = $this->seedGame();
+        [$game, $price, $slot] = $this->seedGame();
 
         $response = $this->postJson("/games/{$game->id}/book", [
             'game_price_id' => $price->id,
+            'play_time_id' => $slot->id,
             'play_date' => now()->toDateString(),
             'full_name' => 'أحمد محمد علي',
             'country_code' => '+218',
@@ -133,10 +135,11 @@ class GamesFlowTest extends TestCase
 
     public function test_full_name_must_be_three_parts(): void
     {
-        [$game, $price] = $this->seedGame();
+        [$game, $price, $slot] = $this->seedGame();
 
         $this->from('/games')->post("/games/{$game->id}/book", [
             'game_price_id' => $price->id,
+            'play_time_id' => $slot->id,
             'play_date' => now()->toDateString(),
             'full_name' => 'أحمد',
             'country_code' => '+218',

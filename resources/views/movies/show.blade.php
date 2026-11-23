@@ -3,12 +3,22 @@
 @section('title', 'سينما بلاس | ' . $movie->name)
 @section('nav_movies', 'active')
 
+@section('meta')
+@include('partials.meta', [
+    'title' => 'سينما بلاس | ' . $movie->name,
+    'description' => \Illuminate\Support\Str::limit(strip_tags($movie->description ?? ''), 150) ?: ('احجز تذاكر فيلم ' . $movie->name . ' في سينما بلاس — أوقات العرض وأسعار الباقات مع تأكيد فوري برمز QR.'),
+    'image' => $movie->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($movie->image) : null,
+])
+@endsection
+
 @push('styles')
 <style>
 .wrap{padding:40px 0 10px}
 .top{display:grid;grid-template-columns:320px 1fr;gap:32px;align-items:start}
 .poster{border-radius:22px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.4)}
 .poster img{width:100%;display:block}
+.trailer{margin-bottom:24px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#000}
+.trailer video{width:100%;display:block;max-height:420px}
 .info h1{font-size:clamp(26px,4vw,40px);font-weight:900;letter-spacing:-1px;margin-bottom:12px}
 .info .meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-weight:700;font-size:14px;margin-bottom:16px}
 .info .meta .star{color:var(--gold)}
@@ -45,12 +55,20 @@
       </div>
       <p>{{ $movie->description }}</p>
 
+      @if ($movie->videoUrl())
+        <div class="trailer">
+          <video controls playsinline preload="metadata" poster="{{ $movie->image ? asset('storage/' . $movie->image) : '' }}">
+            <source src="{{ $movie->videoUrl() }}">
+          </video>
+        </div>
+      @endif
+
       <div class="section-head"><h2 style="font-size:20px">أسعار التذاكر حسب الباقة</h2></div>
       <div class="pkg-table">
         @foreach ($movie->packages as $package)
           <div class="pkg-row">
             <div><div class="nm">{{ $package->name }}</div><div class="inc">{{ $package->includes }}</div></div>
-            <div class="pr">{{ rtrim(rtrim(number_format((float) $package->pivot->price, 2), '0'), '.') }} ﷼</div>
+            <div class="pr">{{ \App\Support\Money::short((float) $package->pivot->price) }}</div>
           </div>
         @endforeach
       </div>
@@ -58,20 +76,22 @@
   </div>
 
   <div class="schedule">
-    <div class="section-head" style="margin-top:30px"><h2>أوقات العرض الأسبوعية</h2></div>
-    @foreach (collect(\App\Models\Showtime::$dayNames) as $idx => $dayName)
-      @php $daySlots = $movie->showtimes->where('day_of_week', $idx); @endphp
-      @if ($daySlots->isNotEmpty())
-        <div class="day-block">
-          <div class="day-head">{{ $dayName }}</div>
-          <div class="slots">
-            @foreach ($daySlots as $slot)
-              <span class="slot">{{ $slot->start_time_short }} — {{ $slot->end_time_short }}</span>
-            @endforeach
-          </div>
+    <div class="section-head" style="margin-top:30px"><h2>أوقات العرض — الأيام القادمة</h2></div>
+    @forelse ($movie->showtimes->groupBy(fn ($s) => $s->show_date?->toDateString()) as $date => $daySlots)
+      <div class="day-block">
+        <div class="day-head">
+          {{ \Illuminate\Support\Carbon::parse($date)->format('l') }}
+          <span style="font-weight:600;opacity:.65;font-size:13px">{{ \Illuminate\Support\Carbon::parse($date)->format('d/m/Y') }}</span>
         </div>
-      @endif
-    @endforeach
+        <div class="slots">
+          @foreach ($daySlots as $slot)
+            <span class="slot">{{ $slot->start_time_short }} — {{ $slot->end_time_short }}</span>
+          @endforeach
+        </div>
+      </div>
+    @empty
+      <p style="color:var(--muted);font-weight:700">لا توجد عروض مجدولة حاليًا.</p>
+    @endforelse
   </div>
 </div>
 @endsection

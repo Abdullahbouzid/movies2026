@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'سينما بلاس | تذكرة ' . $booking->booking_ref)
+@section('robots', 'noindex,nofollow')
 
 @push('styles')
 <style>
@@ -50,8 +51,8 @@
         <div class="row"><span>التاريخ</span><b>{{ $booking->show_date->format('Y-m-d') }}</b></div>
         <div class="row"><span>الوقت</span><b>{{ $booking->showtime->start_time_short }} — {{ $booking->showtime->end_time_short }}</b></div>
         <div class="row"><span>الاسم</span><b>{{ $booking->full_name }}</b></div>
-        <div class="row"><span>الجوال</span><b>{{ $booking->country_code }} {{ $booking->phone }}</b></div>
-        <div class="row"><span>المجموع</span><b>{{ rtrim(rtrim(number_format((float) $booking->price, 2), '0'), '.') }} ﷼</b></div>
+        <div class="row"><span>الجوال</span><b dir="ltr">{{ \App\Support\Mask::phone($booking->country_code . $booking->phone) }}</b></div>
+        <div class="row"><span>المجموع</span><b>{{ \App\Support\Money::short((float) $booking->price) }}</b></div>
       </div>
 
       <div class="status">

@@ -47,7 +47,7 @@ if (MOVIES.length && !MOVIES.some(m => showtimesFor(m, currentDay).length)) {
   }
 }
 let currentGenre = "الكل";
-let currentBooking = { movie: null, showtimes: [], selectedShowtimeId: null, packageId: null };
+let currentBooking = { movie: null, showtimes: [], selectedShowtimeId: null, packageId: null, step: 1 };
 const selectedCountries = {
   phoneCountrySelect: { code: CINEMA.defaultCountry || '+218', flag: '🇱🇾', name: 'ليبيا' },
   whatsappCountrySelect: { code: CINEMA.defaultCountry || '+218', flag: '🇱🇾', name: 'ليبيا' }
@@ -158,14 +158,18 @@ function renderMovies() {
           <div class="showtimes-label">أوقات العرض — ${WEEK_DAYS[currentDay].name}</div>
           <div class="showtimes">
             ${times.length
-              ? times.map(t => `<button class="time" data-movie="${m.id}" data-showtime="${t.id}">${t.time}</button>`).join("")
+              ? times.map(t => {
+                  const full = typeof t.seatsLeft === 'number' && t.seatsLeft <= 0;
+                  return `<button class="time${full ? ' time-full' : ''}" data-movie="${m.id}" data-showtime="${t.id}"
+                            ${full ? 'disabled title="اكتمل العدد"' : `title="${t.seatsLeft} مقعد متاح"`}>${t.time}${full ? ' ✕' : ''}</button>`;
+                }).join("")
               : '<span class="no-times">لا توجد أوقات عرض في هذا اليوم</span>'}
           </div>
 
           <div class="card-footer">
             <div class="price-tag">
               <span class="price-label">السعر من</span>
-              <strong>${money(m.minPrice)} <small>﷼</small></strong>
+              <strong>${money(m.minPrice)} <small>د.ل</small></strong>
             </div>
             <button class="btn-book" data-movie="${m.id}" data-showtime="${first ? first.id : ''}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -194,7 +198,7 @@ function renderTicketTabs(movie) {
     <button type="button" class="ticket-tab ${idx === 0 ? 'active' : ''}" data-package="${p.id}">
       ${p.isVip ? '<span class="tab-badge">VIP</span>' : ''}
       <span class="tab-label">${p.name}</span>
-      <span class="tab-price">${money(movie.prices[p.id])} <small>﷼</small></span>
+      <span class="tab-price">${money(movie.prices[p.id])} <small>د.ل</small></span>
     </button>
   `).join("");
   box.querySelectorAll('.ticket-tab').forEach(tab => {
@@ -228,7 +232,7 @@ function updateTotal() {
   if (!movie) return;
   const price = movie.prices[currentBooking.packageId];
   const pkg = PACKAGES.find(p => p.id === currentBooking.packageId);
-  document.getElementById('totalPrice').innerHTML = `${money(price)} <small>﷼</small>`;
+  document.getElementById('totalPrice').innerHTML = `${money(price)} <small>د.ل</small>`;
   document.getElementById('totalSubLabel').textContent = pkg ? pkg.name : '';
 }
 
@@ -258,9 +262,11 @@ function applyMovieToModal(movie, preselectedShowtimeId) {
   modalPosterEl.style.backgroundPosition = 'center';
 
   const sel = document.getElementById('modalShowtime');
-  sel.innerHTML = currentBooking.showtimes.map(t =>
-    `<option value="${t.id}" ${t.id === currentBooking.selectedShowtimeId ? 'selected' : ''}>${t.time}</option>`
-  ).join('');
+  sel.innerHTML = currentBooking.showtimes.map(t => {
+    const full = typeof t.seatsLeft === 'number' && t.seatsLeft <= 0;
+    const label = typeof t.seatsLeft === 'number' ? `${t.time} — ${full ? 'مكتمل' : t.seatsLeft + ' مقعد'}` : t.time;
+    return `<option value="${t.id}" ${t.id === currentBooking.selectedShowtimeId ? 'selected' : ''} ${full ? 'disabled' : ''}>${label}</option>`;
+  }).join('');
 
   renderTicketTabs(movie);
   updateTotal();
@@ -300,6 +306,7 @@ function openBooking(movieId, preselectedShowtimeId) {
 
   document.getElementById('modalBody').style.display = 'block';
   document.getElementById('successBody').style.display = 'none';
+  goToStep(1);
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
   document.querySelectorAll('.country-select.open').forEach(el => el.classList.remove('open'));
@@ -366,6 +373,110 @@ function filterCountryList(input, listId) {
 /* ═══════════════════════════════════════════════════
    تأكيد الحجز (يُرسل إلى Laravel)
    ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   معالج الحجز — التنقّل بين الخطوات
+   ═══════════════════════════════════════════════════ */
+function goToStep(step) {
+  currentBooking.step = step;
+
+  document.querySelectorAll('.step-panel').forEach(panel =>
+    panel.classList.toggle('is-active', Number(panel.dataset.panel) === step));
+
+  document.querySelectorAll('#bookingSteps .step').forEach(el => {
+    const n = Number(el.dataset.step);
+    el.classList.toggle('is-active', n === step);
+    el.classList.toggle('is-done', n < step);
+  });
+
+  const body = document.getElementById('modalBody');
+  if (body) body.scrollTop = 0;
+
+  if (step === 3) renderReview();
+}
+
+/** Validates only the fields of the step being left, so errors appear in place. */
+function validateStep(step) {
+  if (step === 1) {
+    if (!currentBooking.movie) return 'يرجى اختيار الفيلم';
+    if (!document.getElementById('modalShowtime').value) return 'يرجى اختيار وقت العرض';
+    if (!currentBooking.packageId) return 'يرجى اختيار نوع التذكرة';
+    return null;
+  }
+
+  if (step === 2) {
+    const fullName = document.getElementById('fullName').value.trim();
+    const birthdate = document.getElementById('birthdate').value;
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const whatsapp = document.getElementById('whatsappNumber').value.trim();
+
+    if (fullName.split(/\s+/).filter(Boolean).length < 3) return 'يرجى إدخال الاسم الثلاثي كاملاً';
+    if (!birthdate) return 'يرجى إدخال تاريخ الميلاد';
+    if (phone.replace(/\D/g, '').length < 6) return 'يرجى إدخال رقم هاتف صحيح';
+    if (whatsapp.replace(/\D/g, '').length < 6) return 'يرجى إدخال رقم واتساب صحيح';
+    return null;
+  }
+
+  return null;
+}
+
+function copyPhoneToWhatsapp(cb) {
+  const phone = document.getElementById('phoneNumber');
+  const wa = document.getElementById('whatsappNumber');
+  if (!cb.checked) return;
+  wa.value = phone.value;
+  selectedCountries.whatsappCountrySelect = { ...selectedCountries.phoneCountrySelect };
+  const btn = document.querySelector('#whatsappCountrySelect .country-btn');
+  if (btn) {
+    btn.querySelector('.flag').textContent = selectedCountries.phoneCountrySelect.flag || '🇱🇾';
+    btn.querySelector('.code-text').textContent = selectedCountries.phoneCountrySelect.code;
+  }
+}
+
+function renderReview() {
+  const movie = currentBooking.movie;
+  const pkg = PACKAGES.find(p => p.id === currentBooking.packageId);
+  const showtimeId = document.getElementById('modalShowtime').value;
+  const time = (currentBooking.showtimes || []).find(t => String(t.id) === String(showtimeId));
+  const day = WEEK_DAYS[currentBooking.dayIndex ?? currentDay];
+  const price = movie ? movie.prices[currentBooking.packageId] : null;
+  const phone = document.getElementById('phoneNumber').value.trim();
+  const code = selectedCountries.phoneCountrySelect.code || '';
+
+  const rows = [
+    ['الفيلم', movie ? movie.title : '—'],
+    ['اليوم', `${day.name} — ${day.date}`],
+    ['وقت العرض', time ? time.time : '—'],
+    ['نوع التذكرة', pkg ? pkg.name : '—'],
+    ['الاسم', document.getElementById('fullName').value.trim() || '—'],
+    ['الهاتف', phone ? `${code} ${phone}` : '—'],
+  ];
+
+  document.getElementById('reviewCard').innerHTML = rows.map(([label, value]) => `
+    <div class="review-row">
+      <span class="rv-label">${label}</span>
+      <span class="rv-value">${value}</span>
+    </div>
+  `).join("") + `
+    <div class="review-row rv-highlight">
+      <span class="rv-label">الإجمالي</span>
+      <span class="rv-value">${money(price)} د.ل</span>
+    </div>
+  `;
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.step-next, .step-back');
+  if (!btn) return;
+  const target = Number(btn.dataset.goto);
+  const current = currentBooking.step || 1;
+
+  if (target > current) {
+    const error = validateStep(current);
+    if (error) { alert(error); return; }
+  }
+  goToStep(target);
+});
+
 async function submitBooking(e) {
   e.preventDefault();
   const movie = currentBooking.movie;
@@ -376,10 +487,8 @@ async function submitBooking(e) {
   const showtimeId = document.getElementById('modalShowtime').value;
 
   if (!movie) { alert('يرجى اختيار الفيلم'); return; }
-  if (fullName.split(/\s+/).length < 3) { alert('يرجى إدخال الاسم الثلاثي كاملاً'); return; }
-  if (!birthdate) { alert('يرجى إدخال تاريخ الميلاد'); return; }
-  if (phone.replace(/\D/g, '').length < 6) { alert('يرجى إدخال رقم هاتف صحيح'); return; }
-  if (whatsapp.replace(/\D/g, '').length < 6) { alert('يرجى إدخال رقم واتساب صحيح'); return; }
+  const invalid = validateStep(1) || validateStep(2);
+  if (invalid) { alert(invalid); return; }
 
   const btn = document.querySelector('.submit-btn');
   btn.disabled = true;
@@ -428,9 +537,21 @@ function showSuccess(data, fullName) {
 
   document.getElementById('successMessage').innerHTML =
     `تم حجز <strong>${pkg ? pkg.name : 'تذكرة'}</strong> لمشاهدة فيلم <strong>«${data.movie}»</strong>` +
-    (pkg && pkg.isVip ? '<br><span style="color:#e71d24;font-weight:800">🍿 يشمل المشروبات والفشار</span>' : '');
+    (data.seats ? ` — <strong>${data.seats}</strong> مقعد` : '') +
+    (pkg && pkg.isVip ? '<br><span style="color:#e71d24;font-weight:800">🍿 يشمل المشروبات والفشار</span>' : '') +
+    '<br><span style="font-size:12.5px;color:#6a6a72">احفظ التذكرة، أو أرسلها إلى واتسابك من الزر أدناه.</span>';
 
   document.getElementById('ticketLink').href = data.ticket_url;
+
+  const wa = document.getElementById('whatsappLink');
+  if (wa) {
+    if (data.whatsapp_url) {
+      wa.href = data.whatsapp_url;
+      wa.style.display = 'flex';
+    } else {
+      wa.style.display = 'none';
+    }
+  }
 
   document.getElementById('modalBody').style.display = 'none';
   document.getElementById('successBody').style.display = 'block';

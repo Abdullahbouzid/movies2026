@@ -36,6 +36,13 @@ class GameForm
                             ->label('الأيقونة (إيموجي)')
                             ->maxLength(8)
                             ->helperText('مثال: 🎮'),
+                        TextInput::make('devices_count')
+                            ->label('عدد الأجهزة')
+                            ->numeric()
+                            ->minValue(1)
+                            ->default(1)
+                            ->required()
+                            ->helperText('كل جهاز يُحجز بشكل مستقل في نفس الوقت — يمنع الحجز المزدوج.'),
                         TextInput::make('sort_order')
                             ->label('ترتيب العرض')
                             ->numeric()
@@ -66,6 +73,8 @@ class GameForm
                             ->visibility('public')
                             ->directory('games')
                             ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize((int) config('uploads.image_max_kb'))
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('وصف اللعبة')
@@ -103,7 +112,7 @@ class GameForm
                                     ->minValue(1)
                                     ->required(),
                                 TextInput::make('price')
-                                    ->label('السعر (﷼)')
+                                    ->label(\App\Support\Money::label('السعر'))
                                     ->numeric()
                                     ->minValue(0)
                                     ->step(0.01)

@@ -37,7 +37,7 @@ class GamesTable
                 TextColumn::make('min_price')
                     ->label('يبدأ من')
                     ->state(fn (Game $r) => $r->minPrice())
-                    ->money('LYD')
+                    ->formatStateUsing(fn ($state) => \App\Support\Money::format($state))
                     ->placeholder('—'),
                 TextColumn::make('play_times_count')
                     ->label('أوقات اللعب')

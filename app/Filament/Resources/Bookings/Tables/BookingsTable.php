@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Filament\Resources\Concerns\BuildsBookingAdmin;
 use App\Models\Booking;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class BookingsTable
 {
+    use BuildsBookingAdmin;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -26,12 +29,17 @@ class BookingsTable
                 TextColumn::make('full_name')
                     ->label('الاسم')
                     ->searchable(),
+                self::branchColumn(),
                 TextColumn::make('movie.name')
                     ->label('الفيلم')
                     ->searchable(),
                 TextColumn::make('package.name')
                     ->label('الباقة')
                     ->badge(),
+                TextColumn::make('seats')
+                    ->label('المقاعد')
+                    ->numeric()
+                    ->alignCenter(),
                 TextColumn::make('show_date')
                     ->label('تاريخ العرض')
                     ->date('Y-m-d')
@@ -41,7 +49,8 @@ class BookingsTable
                     ->time('H:i'),
                 TextColumn::make('price')
                     ->label('السعر')
-                    ->money('LYD'),
+                    ->formatStateUsing(fn ($state) => \App\Support\Money::format($state))
+                    ->summarize(Sum::make()->label('الإجمالي')->formatStateUsing(fn ($state) => \App\Support\Money::format($state))),
                 TextColumn::make('payment_status')
                     ->label('الدفع')
                     ->badge()
@@ -52,6 +61,7 @@ class BookingsTable
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state === Booking::ATTENDANCE_ATTENDED ? 'تم الحضور' : 'قيد الانتظار')
                     ->color(fn ($state) => $state === Booking::ATTENDANCE_ATTENDED ? 'success' : 'gray'),
+                self::paidAtColumn(),
             ])
             ->filters([
                 SelectFilter::make('payment_status')
@@ -69,6 +79,8 @@ class BookingsTable
                 SelectFilter::make('movie_id')
                     ->label('الفيلم')
                     ->relationship('movie', 'name'),
+                self::branchFilter(),
+                self::createdBetweenFilter(),
             ])
             ->recordActions([
                 Action::make('markPaid')
@@ -77,7 +89,7 @@ class BookingsTable
                     ->color('success')
                     ->visible(fn (Booking $record) => $record->payment_status === Booking::PAYMENT_PENDING)
                     ->requiresConfirmation()
-                    ->action(fn (Booking $record) => $record->update(['payment_status' => Booking::PAYMENT_PAID])),
+                    ->action(fn (Booking $record) => $record->markPaid()),
                 Action::make('markAttended')
                     ->label('تأكيد الحضور')
                     ->icon('heroicon-o-check-badge')

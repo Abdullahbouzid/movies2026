@@ -73,12 +73,32 @@ class MovieForm
                             ])
                             ->default('الجميع'),
                         FileUpload::make('image')
-                            ->label('صورة الفيلم')
+                            ->label('صورة الغلاف')
                             ->image()
                             ->disk('public')
                             ->visibility('public')
                             ->directory('movies')
                             ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize((int) config('uploads.image_max_kb'))
+                            ->columnSpanFull(),
+                        FileUpload::make('video')
+                            ->label('فيديو قصير / إعلان الفيلم')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->directory('movies/videos')
+                            ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/quicktime'])
+                            ->maxSize((int) config('uploads.movie_video_max_kb'))
+                            ->helperText(fn () => sprintf(
+                                'ارفع ملف فيديو (MP4/WebM/MOV) بحد أقصى %d ميجابايت، أو استخدم رابطًا خارجيًا أدناه.',
+                                (int) round(config('uploads.movie_video_max_kb') / 1024),
+                            ))
+                            ->columnSpanFull(),
+                        TextInput::make('trailer_url')
+                            ->label('أو رابط فيديو خارجي')
+                            ->url()
+                            ->maxLength(500)
+                            ->helperText('يُستخدم فقط إذا لم يتم رفع ملف فيديو.')
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('وصف الفيلم')

@@ -2,17 +2,21 @@
 
 namespace App\Filament\Resources\GameBookings\Tables;
 
+use App\Filament\Resources\Concerns\BuildsBookingAdmin;
 use App\Models\GameBooking;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class GameBookingsTable
 {
+    use BuildsBookingAdmin;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -25,6 +29,7 @@ class GameBookingsTable
                 TextColumn::make('full_name')
                     ->label('الاسم')
                     ->searchable(),
+                self::branchColumn(),
                 TextColumn::make('game.name')
                     ->label('اللعبة')
                     ->searchable(),
@@ -37,7 +42,8 @@ class GameBookingsTable
                     ->sortable(),
                 TextColumn::make('price')
                     ->label('السعر')
-                    ->money('LYD'),
+                    ->formatStateUsing(fn ($state) => \App\Support\Money::format($state))
+                    ->summarize(Sum::make()->label('الإجمالي')->formatStateUsing(fn ($state) => \App\Support\Money::format($state))),
                 TextColumn::make('payment_status')
                     ->label('الدفع')
                     ->badge()
@@ -48,11 +54,14 @@ class GameBookingsTable
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state === GameBooking::ATTENDANCE_ATTENDED ? 'تم الحضور' : 'قيد الانتظار')
                     ->color(fn ($state) => $state === GameBooking::ATTENDANCE_ATTENDED ? 'success' : 'gray'),
+                self::paidAtColumn(),
             ])
             ->filters([
                 SelectFilter::make('game_id')
                     ->label('اللعبة')
                     ->relationship('game', 'name'),
+                self::branchFilter(),
+                self::createdBetweenFilter(),
                 SelectFilter::make('payment_status')
                     ->label('حالة الدفع')
                     ->options([
@@ -73,7 +82,7 @@ class GameBookingsTable
                     ->color('success')
                     ->visible(fn (GameBooking $record) => $record->payment_status === GameBooking::PAYMENT_PENDING)
                     ->requiresConfirmation()
-                    ->action(fn (GameBooking $record) => $record->update(['payment_status' => GameBooking::PAYMENT_PAID])),
+                    ->action(fn (GameBooking $record) => $record->markPaid()),
                 Action::make('markAttended')
                     ->label('تأكيد الحضور')
                     ->icon('heroicon-o-check-badge')

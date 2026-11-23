@@ -18,12 +18,13 @@ class Game extends Model
     protected $fillable = [
         'name', 'slug', 'icon', 'image', 'description', 'meta',
         'color_from', 'color_to', 'badge', 'rating', 'ratings_count',
-        'sort_order', 'is_active',
+        'sort_order', 'is_active', 'devices_count',
     ];
 
     protected $casts = [
         'rating' => 'decimal:1',
         'is_active' => 'boolean',
+        'devices_count' => 'integer',
     ];
 
     protected static function booted(): void

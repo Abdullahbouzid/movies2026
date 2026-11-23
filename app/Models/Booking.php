@@ -2,29 +2,53 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToBranch;
+use App\Models\Concerns\HasBookingQr;
+use App\Models\Concerns\HasPaymentState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
+    use BelongsToBranch;
+    use HasBookingQr;
+    use HasPaymentState;
+
     public const PAYMENT_PENDING = 'pending';
     public const PAYMENT_PAID = 'paid';
 
     public const ATTENDANCE_PENDING = 'pending';
     public const ATTENDANCE_ATTENDED = 'attended';
 
+    protected static function refPrefix(): string
+    {
+        return 'CP';
+    }
+
+    public static function branchService(): string
+    {
+        return 'cinema';
+    }
+
     protected $fillable = [
-        'booking_ref', 'movie_id', 'showtime_id', 'package_id', 'show_date',
+        'booking_ref', 'branch_id', 'movie_id', 'showtime_id', 'package_id', 'seats', 'show_date',
         'full_name', 'birthdate', 'country_name', 'country_code', 'phone',
-        'whatsapp_country_code', 'whatsapp', 'price',
-        'payment_status', 'attendance_status',
+        'whatsapp_country_code', 'whatsapp', 'price', 'qr_path',
+        'payment_status', 'paid_at', 'attendance_status',
     ];
 
     protected $casts = [
+        'paid_at' => 'datetime',
         'birthdate' => 'date',
         'show_date' => 'date',
         'price' => 'decimal:2',
+        'seats' => 'integer',
     ];
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function movie(): BelongsTo
     {
@@ -41,24 +65,37 @@ class Booking extends Model
         return $this->belongsTo(Package::class);
     }
 
-    public static function generateRef(): string
+    public function scopePaid($query)
     {
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        do {
-            $ref = 'CP-';
-            for ($i = 0; $i < 6; $i++) {
-                $ref .= $chars[random_int(0, strlen($chars) - 1)];
-            }
-        } while (self::where('booking_ref', $ref)->exists());
+        return $query->where('payment_status', self::PAYMENT_PAID);
+    }
 
-        return $ref;
+    public function scopePending($query)
+    {
+        return $query->where('payment_status', self::PAYMENT_PENDING);
+    }
+
+    public function verifyUrl(): string
+    {
+        return route('movies.verify', $this->booking_ref);
+    }
+
+    protected function whatsappSummary(): string
+    {
+        return implode(' · ', array_filter([
+            $this->movie?->name,
+            $this->package?->name,
+            $this->show_date?->format('Y-m-d'),
+            $this->showtime?->start_time_short,
+            $this->seats ? $this->seats . ' مقعد' : null,
+        ]));
     }
 
     public function qrPayload(): string
     {
         return implode("\n", [
+            $this->booking_ref,
             'Cinema Plus Ticket',
-            'Ref: ' . $this->booking_ref,
             'Movie: ' . ($this->movie?->name ?? ''),
             'Package: ' . ($this->package?->name ?? ''),
             'Date: ' . $this->show_date?->format('Y-m-d'),

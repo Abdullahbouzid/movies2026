@@ -40,7 +40,7 @@ class PricesRelationManager extends RelationManager
                     ->minValue(1)
                     ->required(),
                 TextInput::make('price')
-                    ->label('السعر (﷼)')
+                    ->label(\App\Support\Money::label('السعر'))
                     ->numeric()
                     ->minValue(0)
                     ->step(0.01)
@@ -67,7 +67,7 @@ class PricesRelationManager extends RelationManager
                     ->suffix(' د'),
                 TextColumn::make('price')
                     ->label('السعر')
-                    ->money('LYD'),
+                    ->formatStateUsing(fn ($state) => \App\Support\Money::format($state)),
                 IconColumn::make('is_default')
                     ->label('افتراضية')
                     ->boolean(),

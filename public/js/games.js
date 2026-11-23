@@ -5,7 +5,9 @@ const DATA = window.GAMES || { games: [], countries: [], weekDays: [] };
 const GAMES = DATA.games || [];
 const COUNTRIES = DATA.countries || [];
 
-let currentBooking = { game: null, price: null };
+const WEEK_DAYS = DATA.weekDays || [];
+
+let currentBooking = { game: null, price: null, dayIndex: 0, slot: null };
 
 const selectedCountries = {
   phoneCountrySelect: { code: DATA.defaultCountry || '+218', flag: '🇱🇾' },
@@ -71,7 +73,7 @@ function renderDurationGrid() {
   const prices = (currentBooking.game && currentBooking.game.prices) || [];
   grid.innerHTML = prices.map(p => `
     <button type="button" class="duration-btn ${currentBooking.price && p.id === currentBooking.price.id ? 'active' : ''}"
-            onclick="selectDuration(${p.id})">${p.label}<small>${p.price} ﷼</small></button>
+            onclick="selectDuration(${p.id})">${p.label}<small>${p.price} د.ل</small></button>
   `).join('');
 }
 
@@ -80,6 +82,68 @@ function selectDuration(id) {
   if (!p) return;
   currentBooking.price = p;
   renderDurationGrid();
+  updateTotal();
+}
+
+/* ═══════════════════════════════════════════════════
+   الأيام وأوقات اللعب (مربوطة بعدد الأجهزة)
+   ═══════════════════════════════════════════════════ */
+function slotsFor(game, dayIndex) {
+  const byDay = (game && game.times && game.times[dayIndex]) || [];
+  return byDay;
+}
+
+function renderSlotDays() {
+  const box = document.getElementById('slotDays');
+  if (!box) return;
+
+  box.innerHTML = WEEK_DAYS.map((d, i) => `
+    <button type="button" class="slot-day ${i === currentBooking.dayIndex ? 'active' : ''}" onclick="selectSlotDay(${i})">
+      ${d.name}<small>${d.date}</small>
+    </button>
+  `).join('');
+}
+
+function selectSlotDay(index) {
+  currentBooking.dayIndex = index;
+  currentBooking.slot = null;
+  renderSlotDays();
+  renderSlotTimes();
+}
+
+function renderSlotTimes() {
+  const box = document.getElementById('slotTimes');
+  const hint = document.getElementById('slotHint');
+  if (!box) return;
+
+  const slots = slotsFor(currentBooking.game, currentBooking.dayIndex);
+
+  if (!slots.length) {
+    box.innerHTML = '';
+    if (hint) hint.textContent = 'لا توجد أوقات لعب متاحة في هذا اليوم، جرّب يومًا آخر.';
+    currentBooking.slot = null;
+    return;
+  }
+
+  if (hint) hint.textContent = 'الأوقات المتاحة — الرقم بين القوسين هو عدد الأجهزة الفارغة.';
+
+  box.innerHTML = slots.map(s => {
+    const full = s.free <= 0;
+    const active = currentBooking.slot && currentBooking.slot.id === s.id ? 'active' : '';
+    return `
+      <button type="button" class="slot-time ${active}" ${full ? 'disabled' : ''} onclick="selectSlotTime(${s.id})">
+        ${s.time} - ${s.end}
+        <small>${full ? 'محجوز بالكامل' : `متاح ${s.free}/${s.total}`}</small>
+      </button>`;
+  }).join('');
+}
+
+function selectSlotTime(id) {
+  const slots = slotsFor(currentBooking.game, currentBooking.dayIndex);
+  const slot = slots.find(s => s.id === id);
+  if (!slot || slot.free <= 0) return;
+  currentBooking.slot = slot;
+  renderSlotTimes();
   updateTotal();
 }
 
@@ -98,6 +162,17 @@ function applyGameToModal(game) {
 
   const prices = game.prices || [];
   currentBooking.price = prices.find(p => p.isDefault) || prices[0] || null;
+
+  // Land on the first day that still has a free slot so the modal is usable immediately.
+  currentBooking.slot = null;
+  let startDay = 0;
+  for (let i = 0; i < WEEK_DAYS.length; i++) {
+    if (slotsFor(game, i).some(s => s.free > 0)) { startDay = i; break; }
+  }
+  currentBooking.dayIndex = startDay;
+
+  renderSlotDays();
+  renderSlotTimes();
   renderDurationGrid();
   updateTotal();
 }
@@ -110,10 +185,20 @@ function onDeviceChange() {
 
 function updateTotal() {
   const total = currentBooking.price ? currentBooking.price.price : 0;
-  document.getElementById('totalPrice').innerHTML = `${total} <small>﷼</small>`;
-  document.getElementById('totalSubLabel').textContent = currentBooking.game
-    ? `${currentBooking.game.name} — ${currentBooking.price ? currentBooking.price.label : '—'}`
-    : '—';
+  document.getElementById('totalPrice').innerHTML = `${total} <small>د.ل</small>`;
+
+  if (!currentBooking.game) {
+    document.getElementById('totalSubLabel').textContent = '—';
+    return;
+  }
+
+  const day = WEEK_DAYS[currentBooking.dayIndex];
+  const parts = [currentBooking.game.name];
+  if (currentBooking.price) parts.push(currentBooking.price.label);
+  if (day) parts.push(`${day.name} ${day.date}`);
+  if (currentBooking.slot) parts.push(`${currentBooking.slot.time} - ${currentBooking.slot.end}`);
+
+  document.getElementById('totalSubLabel').textContent = parts.join(' — ');
 }
 
 function openGameBooking(gameId) {
@@ -123,7 +208,7 @@ function openGameBooking(gameId) {
 
   const deviceSelect = document.getElementById('modalDevice');
   deviceSelect.innerHTML = GAMES.map(g =>
-    `<option value="${g.id}">${g.icon || '🎮'} ${g.name} — ${g.prices && g.prices.length ? g.prices[0].price + ' ﷼' : ''}</option>`
+    `<option value="${g.id}">${g.icon || '🎮'} ${g.name} — ${g.prices && g.prices.length ? g.prices[0].price + ' د.ل' : ''}</option>`
   ).join('');
 
   document.getElementById('gameBookingForm').reset();
@@ -134,11 +219,10 @@ function openGameBooking(gameId) {
 
   applyGameToModal(game);
 
-  const now = new Date();
-  const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-  const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-  document.getElementById('modalDay').textContent =
-    `${dayNames[now.getDay()]} — ${now.getDate()} ${monthNames[now.getMonth()]}`;
+  const today = WEEK_DAYS[0];
+  document.getElementById('modalDay').textContent = today
+    ? `${today.name} — ${today.date}`
+    : '';
 
   document.getElementById('modalBody').style.display = 'block';
   document.getElementById('successBody').style.display = 'none';
@@ -162,6 +246,7 @@ function submitGameBooking(e) {
   const whatsapp = document.getElementById('whatsappNumber').value.trim();
 
   if (!currentBooking.game || !currentBooking.price) { alert('يرجى اختيار الجهاز والمدة'); return; }
+  if (!currentBooking.slot) { alert('يرجى اختيار وقت اللعب'); return; }
   if (fullName.split(/\s+/).length < 3) { alert('يرجى إدخال الاسم الثلاثي كاملاً'); return; }
   if (phone.replace(/\D/g, '').length < 6) { alert('يرجى إدخال رقم هاتف صحيح'); return; }
   if (whatsapp.replace(/\D/g, '').length < 6) { alert('يرجى إدخال رقم واتساب صحيح'); return; }
@@ -180,7 +265,8 @@ function submitGameBooking(e) {
     },
     body: JSON.stringify({
       game_price_id: currentBooking.price.id,
-      play_date: new Date().toISOString().slice(0, 10),
+      play_time_id: currentBooking.slot.id,
+      play_date: WEEK_DAYS[currentBooking.dayIndex].iso,
       full_name: fullName,
       country_code: selectedCountries.phoneCountrySelect.code,
       country_name: (COUNTRIES.find(c => c.code === selectedCountries.phoneCountrySelect.code) || {}).name || '',
@@ -201,7 +287,8 @@ function submitGameBooking(e) {
       qr.alt = `حجز ${data.reference}`;
       document.getElementById('successMessage').innerHTML =
         `تم حجز <strong>${data.game}</strong> لمدة <strong>${data.duration}</strong>
-         <br>المجموع: <strong>${data.price} ﷼</strong>`;
+         <br>الموعد: <strong>${data.slot}</strong> — ${data.play_date}
+         <br>الجهاز: <strong>${data.device}</strong> • المجموع: <strong>${data.price} د.ل</strong>`;
       document.getElementById('modalBody').style.display = 'none';
       document.getElementById('successBody').style.display = 'block';
       document.getElementById('successBody').scrollTop = 0;
@@ -287,4 +374,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderCountryList('phoneCountryList', 'phoneCountrySelect');
   renderCountryList('whatsappCountryList', 'whatsappCountrySelect');
+  renderSlotDays();
 });

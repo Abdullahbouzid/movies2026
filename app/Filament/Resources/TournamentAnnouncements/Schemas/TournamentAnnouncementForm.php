@@ -47,6 +47,8 @@ class TournamentAnnouncementForm
                             ->visibility('public')
                             ->directory('announcements')
                             ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize((int) config('uploads.image_max_kb'))
                             ->columnSpanFull(),
                         Textarea::make('body')
                             ->label('نص الإعلان')

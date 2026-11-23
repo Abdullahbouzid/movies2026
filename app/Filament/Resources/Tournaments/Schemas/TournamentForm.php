@@ -55,13 +55,13 @@ class TournamentForm
                             ->label('وقت البداية')
                             ->seconds(false),
                         TextInput::make('entry_fee')
-                            ->label('رسوم الاشتراك (﷼)')
+                            ->label(\App\Support\Money::label('رسوم الاشتراك'))
                             ->numeric()
                             ->minValue(0)
                             ->step(0.01)
                             ->default(0),
                         TextInput::make('prize')
-                            ->label('الجائزة (﷼)')
+                            ->label(\App\Support\Money::label('الجائزة'))
                             ->numeric()
                             ->minValue(0)
                             ->step(0.01)
@@ -73,6 +73,8 @@ class TournamentForm
                             ->visibility('public')
                             ->directory('tournaments')
                             ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize((int) config('uploads.image_max_kb'))
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('وصف البطولة')

@@ -46,7 +46,7 @@ class TournamentsTable
                     }),
                 TextColumn::make('prize')
                     ->label('الجائزة')
-                    ->money('LYD'),
+                    ->formatStateUsing(fn ($state) => \App\Support\Money::format($state)),
                 TextColumn::make('starts_on')
                     ->label('تبدأ في')
                     ->date('Y-m-d')

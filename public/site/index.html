@@ -197,121 +197,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(231,29,36,.5),0 10px 30px -8px rgba(231,29,36,.7)}50%{box-shadow:0 0 0 18px rgba(231,29,36,0),0 10px 30px -8px rgba(231,29,36,.7)}}
 
 /* ═══════════════════════════════════════════════════
-   13) المودال
-   ═══════════════════════════════════════════════════ */
-.modal-overlay{position:fixed;inset:0;background:rgba(10,10,16,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;animation:overlayIn .25s}
-.modal-overlay.show{display:flex}
-@keyframes overlayIn{from{opacity:0}to{opacity:1}}
-.modal{background:#fff;border-radius:22px;width:100%;max-width:540px;margin:auto;position:relative;box-shadow:0 40px 100px -40px rgba(0,0,0,.5);animation:modalIn .3s cubic-bezier(.2,.7,.3,1);overflow:hidden}
-@keyframes modalIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-.modal-header{position:relative;padding:22px 22px 20px;background:linear-gradient(135deg,#0a0a10 0%,#2b0a0d 100%);color:#fff;display:flex;align-items:flex-start;gap:14px;transition:background .4s}
-.modal-close{position:absolute;top:12px;left:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer;font-size:20px;line-height:1;transition:.2s;padding:0}
-.modal-close:hover{background:rgba(255,255,255,.22);transform:rotate(90deg)}
-.modal-poster{width:62px;height:92px;border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;box-shadow:0 8px 20px -8px rgba(0,0,0,.6);transition:transform .4s}
-.modal-poster.pulse{animation:posterPulse .55s ease}
-@keyframes posterPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08) rotate(-3deg)}}
-.modal-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 60%)}
-.modal-title-wrap{flex:1;min-width:0;padding-top:2px;padding-inline-start:8px}
-.modal-title-wrap h3{font-size:19px;font-weight:900;margin-bottom:4px;letter-spacing:-.3px;transition:.25s}
-.modal-title-wrap .modal-meta{font-size:12px;color:rgba(255,255,255,.72);font-weight:600;margin-bottom:10px;transition:.25s}
-.modal-day-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;background:rgba(231,29,36,.25);color:#ff8a8e;border:1px solid rgba(231,29,36,.4)}
-.modal-body{padding:22px;max-height:calc(90vh - 150px);overflow-y:auto}
-.modal-body::-webkit-scrollbar{width:5px}
-.modal-body::-webkit-scrollbar-thumb{background:#d4d4da;border-radius:10px}
-.ticket-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.ticket-tab{padding:14px 12px;border-radius:14px;border:1.5px solid var(--line);background:#fafafa;cursor:pointer;font-family:inherit;text-align:center;transition:.22s;position:relative}
-.ticket-tab:hover{border-color:rgba(231,29,36,.32)}
-.ticket-tab.active{border-color:var(--gold);background:var(--gold-soft)}
-.ticket-tab .tab-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
-.ticket-tab.active .tab-label{color:var(--gold)}
-.ticket-tab .tab-price{display:block;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.5px;line-height:1}
-.ticket-tab .tab-price small{font-size:11px;font-weight:700}
-.ticket-tab .tab-badge{position:absolute;top:-8px;right:8px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;background:linear-gradient(135deg,#e71d24,#8b1115);color:#fff;letter-spacing:.3px}
-.vip-perks{display:none;align-items:center;gap:10px;padding:11px 14px;border-radius:11px;background:rgba(231,29,36,.06);border:1px dashed rgba(231,29,36,.35);margin-bottom:18px;font-size:12.5px;font-weight:700;color:var(--gold)}
-.vip-perks.show{display:flex;animation:fadeInUp .3s}
-.vip-perks svg{width:18px;height:18px;flex-shrink:0}
-.field-modal{margin-bottom:13px}
-.field-modal>label{display:block;font-size:12px;font-weight:800;color:#34506a;margin-bottom:7px}
-.field-modal>label .req{color:var(--gold)}
-.field-modal input[type="text"],.field-modal input[type="date"],.field-modal input[type="tel"],.field-modal select{width:100%;height:44px;border-radius:10px;border:1.5px solid var(--line);background:#fafafa;padding:0 14px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--text);outline:none;transition:.2s}
-.field-modal input:focus,.field-modal select:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px var(--gold-soft)}
-.field-modal input::placeholder{color:#a0a0a8;font-weight:500}
-
-/* حقل الفيلم المميّز */
-.field-modal.movie-field select{
-  height:50px;
-  font-size:14px;
-  font-weight:700;
-  background:linear-gradient(135deg,#fafafa,#f4f4f6);
-  border:1.5px solid rgba(231,29,36,.25);
-  cursor:pointer;
-  padding-left:38px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23e71d24' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='4' width='20' height='16' rx='2'/><path d='M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5'/></svg>");
-  background-repeat:no-repeat;
-  background-position:left 14px center;
-  background-size:18px 18px;
-}
-.field-modal.movie-field select:focus{
-  border-color:var(--gold);
-  background-color:#fff;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23e71d24' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='4' width='20' height='16' rx='2'/><path d='M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5'/></svg>");
-}
-
-.phone-input{display:flex;gap:8px;position:relative}
-.country-select{position:relative;flex-shrink:0}
-.country-btn{height:44px;padding:0 11px;border-radius:10px;border:1.5px solid var(--line);background:#fafafa;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s;white-space:nowrap;direction:ltr}
-.country-btn:hover{border-color:rgba(231,29,36,.35)}
-.country-select.open .country-btn{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px var(--gold-soft)}
-.country-btn .flag{font-size:15px;line-height:1}
-.country-btn svg{width:11px;height:11px;color:var(--muted);transition:transform .2s;flex-shrink:0}
-.country-select.open .country-btn svg{transform:rotate(180deg)}
-.country-dropdown{position:absolute;top:calc(100% + 6px);right:0;width:270px;background:#fff;border-radius:13px;border:1px solid var(--line);box-shadow:0 20px 50px -15px rgba(0,0,0,.28);z-index:20;display:none;overflow:hidden;animation:dropdownIn .2s}
-@keyframes dropdownIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.country-select.open .country-dropdown{display:block}
-.country-search-wrap{padding:10px;border-bottom:1px solid var(--line)}
-.country-search{width:100%;height:36px!important;padding:0 12px!important;font-size:12.5px!important;background:#f4f4f6!important;border:1px solid transparent!important;border-radius:8px!important}
-.country-search:focus{background:#fff!important;border-color:var(--gold)!important}
-.country-list{max-height:230px;overflow-y:auto;padding:6px}
-.country-list::-webkit-scrollbar{width:5px}
-.country-list::-webkit-scrollbar-thumb{background:#d4d4da;border-radius:10px}
-.country-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text);transition:.15s}
-.country-item:hover{background:var(--gold-soft)}
-.country-item.selected{background:var(--gold-soft);color:var(--gold);font-weight:800}
-.country-item .flag{font-size:16px;line-height:1;flex-shrink:0}
-.country-item .cname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.country-item .ccode{font-size:11.5px;font-weight:800;color:var(--muted);direction:ltr;flex-shrink:0}
-.country-item.selected .ccode{color:var(--gold)}
-.country-empty{padding:22px;text-align:center;font-size:12.5px;color:var(--muted);font-weight:600}
-.total-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-radius:12px;background:#fafafa;border:1px solid var(--line);margin:16px 0 14px}
-.total-row .total-label{font-size:13px;font-weight:700;color:var(--muted)}
-.total-row .total-label small{display:block;font-size:10.5px;color:#a0a0a8;margin-top:2px;font-weight:600}
-.total-row strong{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:-.5px}
-.total-row strong small{font-size:12px;font-weight:700}
-.submit-btn{width:100%;height:50px;font-size:14.5px;justify-content:center}
-.success-state{padding:30px 20px 34px;text-align:center}
-.success-icon{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#e71d24,#8b1115);display:grid;place-items:center;margin:0 auto 20px;color:#fff;box-shadow:0 15px 30px -10px rgba(231,29,36,.6);animation:popIn .4s cubic-bezier(.2,.9,.4,1.2)}
-@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-.success-icon svg{width:34px;height:34px}
-.success-state h3{font-size:22px;font-weight:900;margin-bottom:10px;letter-spacing:-.5px}
-.success-state>p{font-size:14px;color:var(--muted);line-height:1.7;font-weight:500;margin-bottom:22px}
-.success-state .btn{width:100%;justify-content:center}
-.qr-ticket{background:#fff;border:2px solid var(--gold);border-radius:16px;overflow:hidden;margin:0 0 22px;text-align:right;box-shadow:0 12px 34px -18px rgba(231,29,36,.45)}
-.qr-ticket-header{background:linear-gradient(135deg,var(--gold),#8b1115);color:#fff;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
-.qr-ticket-header span{opacity:.85}
-.qr-ticket-header strong{font-size:14px;letter-spacing:1.5px;direction:ltr;font-family:'Courier New',monospace;font-weight:900}
-.qr-ticket-body{padding:20px 16px;text-align:center;background:radial-gradient(circle at 50% 0%,rgba(231,29,36,.04),transparent 70%),#fff}
-#qrImage{width:200px;height:200px;display:block;margin:0 auto;padding:8px;background:#fff;border-radius:12px;background-color:#f4f4f6;animation:qrGlow 2.6s infinite}
-@keyframes qrGlow{0%,100%{box-shadow:0 4px 20px -8px rgba(0,0,0,.15),0 0 0 0 rgba(231,29,36,.35)}50%{box-shadow:0 4px 20px -8px rgba(0,0,0,.15),0 0 0 12px rgba(231,29,36,0)}}
-.qr-ticket-footer{padding:16px;border-top:2px dashed rgba(231,29,36,.35);background:#fafafa}
-.screenshot-note{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:rgba(231,29,36,.07);border:1.5px dashed rgba(231,29,36,.45);border-radius:11px;animation:notePulse 2.2s infinite}
-@keyframes notePulse{0%,100%{background:rgba(231,29,36,.07);border-color:rgba(231,29,36,.45)}50%{background:rgba(231,29,36,.14);border-color:rgba(231,29,36,.7)}}
-.screenshot-note svg{width:22px;height:22px;color:var(--gold);flex-shrink:0;margin-top:2px}
-.screenshot-note-text{flex:1;min-width:0}
-.screenshot-note-text strong{display:block;font-size:13px;font-weight:900;color:var(--gold);margin-bottom:3px}
-.screenshot-note-text span{font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.55;display:block}
-
-/* ═══════════════════════════════════════════════════
-   14) التجاوب
+   13) التجاوب
    ═══════════════════════════════════════════════════ */
 @media (max-width:1100px){.links{gap:14px;font-size:13px}}
 @media (max-width:960px){
@@ -346,13 +232,6 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
   .qa-body{padding:13px 14px}
   .qa-body h4{font-size:14px}
   .qa-body p{font-size:11.5px;margin-bottom:8px}
-  .modal-body{padding:18px}
-  .modal-header{padding:18px}
-  .country-dropdown{width:230px;right:auto;left:0}
-  .ticket-tab{padding:12px 8px}
-  .ticket-tab .tab-price{font-size:17px}
-  #qrImage{width:170px;height:170px}
-  .success-state{padding:26px 12px 28px}
   .floating-cta .floating-text{display:none}
   .floating-cta{width:54px;padding:0;justify-content:center;border-radius:50%}
 }
@@ -373,7 +252,7 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
       <a href="/cafe">حجز مناسبات داخل مقهى الكلية</a>
     </nav>
     <div style="display:flex;gap:9px;align-items:center">
-      <button class="btn-login">تسجيل الدخول</button>
+      <a class="btn-login" href="/admin/login">تسجيل الدخول</a>
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -400,10 +279,10 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
         </div>
         <p>في مستقبلٍ بعيد، يكتشف طيّار شاب أنّ آخر نجم مضيء في المجرّة على وشك الانطفاء، فيخوض رحلةً عبر الفضاء لإنقاذ ما تبقّى من الضوء… رحلة ستغيّر مصير البشرية.</p>
         <div class="hero-actions">
-          <button class="btn btn-gold" onclick="openBooking('النجم الأخير')">
+          <a href="/movies" class="btn btn-gold">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
             احجز تذكرتك
-          </button>
+          </a>
           <a href="/movies" class="btn btn-ghost">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5"/></svg>
             تصفّح الأفلام
@@ -537,219 +416,14 @@ footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;back
 </footer>
 
 <!-- زر عائم للحجز -->
-<button class="floating-cta" onclick="openBooking()" aria-label="احجز الآن">
+<a class="floating-cta" href="/movies" aria-label="احجز الآن">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
   <span class="floating-text">احجز الآن</span>
-</button>
-
-<!-- ════════ نافذة الحجز ════════ -->
-<div class="modal-overlay" id="bookingModal">
-  <div class="modal">
-    <div class="modal-header">
-      <button class="modal-close" onclick="closeBooking()" aria-label="إغلاق">×</button>
-      <div class="modal-poster" id="modalPoster"></div>
-      <div class="modal-title-wrap">
-        <h3 id="modalTitle">—</h3>
-        <p class="modal-meta" id="modalMeta">—</p>
-        <span class="modal-day-badge" id="modalDay">—</span>
-      </div>
-    </div>
-    <div class="modal-body" id="modalBody">
-      <div class="ticket-tabs">
-        <button type="button" class="ticket-tab active" data-type="regular" onclick="selectTicketType('regular')">
-          <span class="tab-label">تذكرة عادية</span><span class="tab-price">35 <small>﷼</small></span>
-        </button>
-        <button type="button" class="ticket-tab vip" data-type="vip" onclick="selectTicketType('vip')">
-          <span class="tab-badge">VIP</span><span class="tab-label">تذكرة VIP</span><span class="tab-price">80 <small>﷼</small></span>
-        </button>
-      </div>
-      <div class="vip-perks" id="vipPerks">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        <span>تذكرة VIP تشمل المشروبات والفشار مجانًا 🍿🥤</span>
-      </div>
-      <form id="bookingForm" onsubmit="submitBooking(event)" novalidate>
-
-        <!-- ★★★ حقل اختيار الفيلم ★★★ -->
-        <div class="field-modal movie-field">
-          <label>الفيلم المراد حجزه <span class="req">*</span></label>
-          <select id="modalMovie" onchange="onMovieChange()" required></select>
-        </div>
-
-        <div class="field-modal"><label>وقت العرض <span class="req">*</span></label><select id="modalShowtime" required></select></div>
-        <div class="field-modal"><label>الاسم الثلاثي <span class="req">*</span></label><input type="text" id="fullName" placeholder="مثال: محمد أحمد العلي" required></div>
-        <div class="field-modal"><label>تاريخ الميلاد <span class="req">*</span></label><input type="date" id="birthdate" required></div>
-        <div class="field-modal"><label>رقم الهاتف <span class="req">*</span></label>
-          <div class="phone-input">
-            <div class="country-select" id="phoneCountrySelect">
-              <button type="button" class="country-btn" onclick="toggleCountryDropdown('phoneCountrySelect')">
-                <span class="flag">🇱🇾</span><span class="code-text">+218</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'phoneCountryList')"></div><div class="country-list" id="phoneCountryList"></div></div>
-            </div>
-            <input type="tel" id="phoneNumber" placeholder="91 345 6789" required>
-          </div>
-        </div>
-        <div class="field-modal"><label>رقم الواتساب <span class="req">*</span></label>
-          <div class="phone-input">
-            <div class="country-select" id="whatsappCountrySelect">
-              <button type="button" class="country-btn" onclick="toggleCountryDropdown('whatsappCountrySelect')">
-                <span class="flag">🇱🇾</span><span class="code-text">+218</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              <div class="country-dropdown"><div class="country-search-wrap"><input type="text" class="country-search" placeholder="ابحث بالاسم أو الرمز +218" oninput="filterCountryList(this, 'whatsappCountryList')"></div><div class="country-list" id="whatsappCountryList"></div></div>
-            </div>
-            <input type="tel" id="whatsappNumber" placeholder="91 345 6789" required>
-          </div>
-        </div>
-        <div class="total-row">
-          <span class="total-label">المجموع الكلي<small id="totalSubLabel">تذكرة عادية</small></span>
-          <strong id="totalPrice">35 <small>﷼</small></strong>
-        </div>
-        <button type="submit" class="btn btn-gold submit-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          تأكيد الحجز
-        </button>
-      </form>
-    </div>
-    <div class="modal-body" id="successBody" style="display:none">
-      <div class="success-state">
-        <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-        <h3>تم تأكيد الحجز بنجاح!</h3>
-        <p id="successMessage">سيتم إرسال تفاصيل التذكرة إلى رقم الواتساب المُدخل.</p>
-        <div class="qr-ticket">
-          <div class="qr-ticket-header"><span>رقم الحجز</span><strong id="bookingRef">CP-000000</strong></div>
-          <div class="qr-ticket-body"><img id="qrImage" alt="رمز QR" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23f4f4f6'/></svg>"></div>
-          <div class="qr-ticket-footer">
-            <div class="screenshot-note">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              <div class="screenshot-note-text"><strong>⚠️ يجب عليك أخذ لقطة شاشة</strong><span>احفظ هذه التذكرة على هاتفك وأظهر رمز QR عند بوابة الدخول. لن تتمكن من الوصول للتذكرة بعد إغلاق هذه النافذة.</span></div>
-            </div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-gold" onclick="closeBooking()">تم، حفظت التذكرة</button>
-      </div>
-    </div>
-  </div>
-</div>
+</a>
 
 <script>
 /* ═══════════════════════════════════════════════════
-   البيانات
-   ═══════════════════════════════════════════════════ */
-const movies = [
-  { title:"ظل المدينة",     genre:"إثارة",        rating:8.6, duration:128, cert:"+16", g1:"#eb1e23", g2:"#7a0d10", seed:1 },
-  { title:"رحلة الصحراء",   genre:"مغامرة",       rating:8.1, duration:142, cert:"+12", g1:"#c4171c", g2:"#eb1e23", seed:2 },
-  { title:"النجم الأخير",   genre:"خيال علمي",    rating:9.0, duration:155, cert:"+12", g1:"#8b1115", g2:"#e71d24", seed:3 },
-  { title:"قلوب حائرة",     genre:"رومانسي",      rating:7.4, duration:112, cert:"+12", g1:"#e71d24", g2:"#a81216", seed:4 },
-  { title:"المهمة: صفر",    genre:"أكشن",         rating:8.8, duration:136, cert:"+16", g1:"#5c0a0d", g2:"#e71d24", seed:5 },
-  { title:"ضحكة الليل",     genre:"كوميدي",       rating:7.9, duration:105, cert:"+12", g1:"#e71d24", g2:"#c4171c", seed:6 },
-  { title:"بحر الأسرار",    genre:"غموض",         rating:8.3, duration:121, cert:"+16", g1:"#a81216", g2:"#e71d24", seed:7 },
-  { title:"عودة البطل",     genre:"دراما",        rating:8.5, duration:133, cert:"+12", g1:"#7a0d10", g2:"#c4171c", seed:8 },
-  { title:"المدينة الحالمة", genre:"رسوم متحركة", rating:8.2, duration:98,  cert:"الجميع", g1:"#e71d24", g2:"#7a0d10", seed:9 }
-];
-const TICKET_PRICES = { regular: 35, vip: 80 };
-const COUNTRIES = [
-  { name:'ليبيا',         nameEn:'Libya',        code:'+218', flag:'🇱🇾' },
-  { name:'السعودية',      nameEn:'Saudi Arabia', code:'+966', flag:'🇸🇦' },
-  { name:'مصر',           nameEn:'Egypt',        code:'+20',  flag:'🇪🇬' },
-  { name:'الإمارات',      nameEn:'UAE',          code:'+971', flag:'🇦🇪' },
-  { name:'الكويت',        nameEn:'Kuwait',       code:'+965', flag:'🇰🇼' },
-  { name:'قطر',           nameEn:'Qatar',        code:'+974', flag:'🇶🇦' },
-  { name:'البحرين',       nameEn:'Bahrain',      code:'+973', flag:'🇧🇭' },
-  { name:'عُمان',         nameEn:'Oman',         code:'+968', flag:'🇴🇲' },
-  { name:'الأردن',        nameEn:'Jordan',       code:'+962', flag:'🇯🇴' },
-  { name:'لبنان',         nameEn:'Lebanon',      code:'+961', flag:'🇱🇧' },
-  { name:'سوريا',         nameEn:'Syria',        code:'+963', flag:'🇸🇾' },
-  { name:'العراق',        nameEn:'Iraq',         code:'+964', flag:'🇮🇶' },
-  { name:'فلسطين',        nameEn:'Palestine',    code:'+970', flag:'🇵🇸' },
-  { name:'اليمن',         nameEn:'Yemen',        code:'+967', flag:'🇾🇪' },
-  { name:'السودان',       nameEn:'Sudan',        code:'+249', flag:'🇸🇩' },
-  { name:'المغرب',        nameEn:'Morocco',      code:'+212', flag:'🇲🇦' },
-  { name:'الجزائر',       nameEn:'Algeria',      code:'+213', flag:'🇩🇿' },
-  { name:'تونس',          nameEn:'Tunisia',      code:'+216', flag:'🇹🇳' },
-  { name:'موريتانيا',     nameEn:'Mauritania',   code:'+222', flag:'🇲🇷' },
-  { name:'الصومال',       nameEn:'Somalia',      code:'+252', flag:'🇸🇴' },
-  { name:'جيبوتي',        nameEn:'Djibouti',     code:'+253', flag:'🇩🇯' },
-  { name:'جزر القمر',     nameEn:'Comoros',      code:'+269', flag:'🇰🇲' },
-  { name:'تركيا',         nameEn:'Turkey',       code:'+90',  flag:'🇹🇷' },
-  { name:'إيران',         nameEn:'Iran',         code:'+98',  flag:'🇮🇷' },
-  { name:'باكستان',       nameEn:'Pakistan',     code:'+92',  flag:'🇵🇰' },
-  { name:'الهند',         nameEn:'India',        code:'+91',  flag:'🇮🇳' },
-  { name:'بنغلاديش',      nameEn:'Bangladesh',   code:'+880', flag:'🇧🇩' },
-  { name:'إندونيسيا',     nameEn:'Indonesia',    code:'+62',  flag:'🇮🇩' },
-  { name:'ماليزيا',       nameEn:'Malaysia',     code:'+60',  flag:'🇲🇾' },
-  { name:'الفلبين',       nameEn:'Philippines',  code:'+63',  flag:'🇵🇭' },
-  { name:'الصين',         nameEn:'China',        code:'+86',  flag:'🇨🇳' },
-  { name:'اليابان',       nameEn:'Japan',        code:'+81',  flag:'🇯🇵' },
-  { name:'كوريا الجنوبية', nameEn:'South Korea', code:'+82',  flag:'🇰🇷' },
-  { name:'الولايات المتحدة', nameEn:'USA',       code:'+1',   flag:'🇺🇸' },
-  { name:'كندا',          nameEn:'Canada',       code:'+1',   flag:'🇨🇦' },
-  { name:'بريطانيا',      nameEn:'United Kingdom', code:'+44', flag:'🇬🇧' },
-  { name:'فرنسا',         nameEn:'France',       code:'+33',  flag:'🇫🇷' },
-  { name:'ألمانيا',       nameEn:'Germany',      code:'+49',  flag:'🇩🇪' },
-  { name:'إيطاليا',       nameEn:'Italy',        code:'+39',  flag:'🇮🇹' },
-  { name:'إسبانيا',       nameEn:'Spain',        code:'+34',  flag:'🇪🇸' },
-  { name:'البرتغال',      nameEn:'Portugal',     code:'+351', flag:'🇵🇹' },
-  { name:'هولندا',        nameEn:'Netherlands',  code:'+31',  flag:'🇳🇱' },
-  { name:'بلجيكا',        nameEn:'Belgium',      code:'+32',  flag:'🇧🇪' },
-  { name:'سويسرا',        nameEn:'Switzerland',  code:'+41',  flag:'🇨🇭' },
-  { name:'النمسا',        nameEn:'Austria',      code:'+43',  flag:'🇦🇹' },
-  { name:'السويد',        nameEn:'Sweden',       code:'+46',  flag:'🇸🇪' },
-  { name:'النرويج',       nameEn:'Norway',       code:'+47',  flag:'🇳🇴' },
-  { name:'الدنمارك',      nameEn:'Denmark',      code:'+45',  flag:'🇩🇰' },
-  { name:'فنلندا',        nameEn:'Finland',      code:'+358', flag:'🇫🇮' },
-  { name:'أيرلندا',       nameEn:'Ireland',      code:'+353', flag:'🇮🇪' },
-  { name:'روسيا',         nameEn:'Russia',       code:'+7',   flag:'🇷🇺' },
-  { name:'أوكرانيا',      nameEn:'Ukraine',      code:'+380', flag:'🇺🇦' },
-  { name:'بولندا',        nameEn:'Poland',       code:'+48',  flag:'🇵🇱' },
-  { name:'اليونان',       nameEn:'Greece',       code:'+30',  flag:'🇬🇷' },
-  { name:'أستراليا',      nameEn:'Australia',    code:'+61',  flag:'🇦🇺' },
-  { name:'نيوزيلندا',     nameEn:'New Zealand',  code:'+64',  flag:'🇳🇿' },
-  { name:'البرازيل',      nameEn:'Brazil',       code:'+55',  flag:'🇧🇷' },
-  { name:'الأرجنتين',     nameEn:'Argentina',    code:'+54',  flag:'🇦🇷' },
-  { name:'المكسيك',       nameEn:'Mexico',       code:'+52',  flag:'🇲🇽' },
-  { name:'جنوب أفريقيا',  nameEn:'South Africa', code:'+27',  flag:'🇿🇦' },
-  { name:'نيجيريا',       nameEn:'Nigeria',      code:'+234', flag:'🇳🇬' },
-  { name:'كينيا',         nameEn:'Kenya',        code:'+254', flag:'🇰🇪' },
-  { name:'إثيوبيا',       nameEn:'Ethiopia',     code:'+251', flag:'🇪🇹' },
-  { name:'غانا',          nameEn:'Ghana',        code:'+233', flag:'🇬🇭' },
-  { name:'أفغانستان',     nameEn:'Afghanistan',  code:'+93',  flag:'🇦🇫' },
-  { name:'سنغافورة',      nameEn:'Singapore',    code:'+65',  flag:'🇸🇬' },
-  { name:'تايلاند',       nameEn:'Thailand',     code:'+66',  flag:'🇹🇭' },
-  { name:'فيتنام',        nameEn:'Vietnam',      code:'+84',  flag:'🇻🇳' }
-];
-const dayNames   = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-const today = new Date();
-const weekDays = [];
-for (let i = 0; i < 7; i++) {
-  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
-  weekDays.push({ name: dayNames[d.getDay()], date: `${d.getDate()} ${monthNames[d.getMonth()]}`, isToday: i === 0 });
-}
-const timePools = [
-  ["11:30","14:00","16:30","19:00","21:30"],
-  ["12:00","14:45","17:15","20:00","22:30"],
-  ["13:00","15:30","18:00","20:45","23:15"],
-  ["12:30","15:00","17:45","20:15","22:45"],
-  ["11:45","14:15","16:45","19:15","21:45","23:45"]
-];
-function getShowtimes(movie, dayIndex){ return timePools[(movie.seed + dayIndex) % timePools.length]; }
-function generateBookingRef(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r='CP-'; for(let i=0;i<6;i++) r+=c[Math.floor(Math.random()*c.length)]; return r; }
-
-/* ═══════════════════════════════════════════════════
-   الحالة
-   ═══════════════════════════════════════════════════ */
-let currentDay = 0;
-let currentBooking = { movie: null, times: [], selectedTime: null, ticketType: 'regular' };
-const selectedCountries = {
-  phoneCountrySelect: { code: '+218', flag: '🇱🇾' },
-  whatsappCountrySelect: { code: '+218', flag: '🇱🇾' }
-};
-const DEFAULT_MOVIE = 'النجم الأخير';
-
-/* ═══════════════════════════════════════════════════
-   الموبايل
+   التنقّل على الموبايل
    ═══════════════════════════════════════════════════ */
 function initMobileMenu(){
   const btn = document.getElementById('mobileMenuBtn');
@@ -762,195 +436,10 @@ function initMobileMenu(){
 }
 
 /* ═══════════════════════════════════════════════════
-   دالة تطبيق تفاصيل الفيلم على النافذة
-   ═══════════════════════════════════════════════════ */
-function applyMovieToModal(movie, preselectedTime){
-  currentBooking.movie = movie;
-  currentBooking.times = getShowtimes(movie, currentDay);
-  currentBooking.selectedTime = preselectedTime || currentBooking.times[0];
-
-  /* تحديث الهيدر */
-  document.getElementById('modalTitle').textContent = movie.title;
-  document.getElementById('modalMeta').textContent = `${movie.genre} • ★${movie.rating} • ${movie.duration} دقيقة • ${movie.cert}`;
-  document.getElementById('modalPoster').style.background = `linear-gradient(155deg, ${movie.g1}, ${movie.g2})`;
-
-  /* تحديث أوقات العرض */
-  const sel = document.getElementById('modalShowtime');
-  sel.innerHTML = currentBooking.times.map(t =>
-    `<option value="${t}" ${t === currentBooking.selectedTime ? 'selected' : ''}>${t}</option>`
-  ).join('');
-
-  /* نبضة على الملصق للإشارة إلى التغيير */
-  const poster = document.getElementById('modalPoster');
-  poster.classList.remove('pulse');
-  void poster.offsetWidth;
-  poster.classList.add('pulse');
-}
-
-/* ═══════════════════════════════════════════════════
-   عند تغيير الفيلم من القائمة
-   ═══════════════════════════════════════════════════ */
-function onMovieChange(){
-  const title = document.getElementById('modalMovie').value;
-  const movie = movies.find(m => m.title === title);
-  if (!movie) return;
-  applyMovieToModal(movie);
-}
-
-/* ═══════════════════════════════════════════════════
-   فتح نافذة الحجز
-   ═══════════════════════════════════════════════════ */
-function openBooking(movieTitle, preselectedTime){
-  const modal = document.getElementById('bookingModal');
-  if (!modal) return;
-
-  /* 1) تعبئة قائمة الأفلام */
-  const movieSelect = document.getElementById('modalMovie');
-  movieSelect.innerHTML = movies.map(m =>
-    `<option value="${m.title}">${m.title} — ${m.genre}</option>`
-  ).join('');
-
-  /* 2) إعادة تعيين النموذج أولاً */
-  document.getElementById('bookingForm').reset();
-
-  /* 3) تحديد الفيلم (من المعطى أو الافتراضي) */
-  let movie = movieTitle ? movies.find(m => m.title === movieTitle) : null;
-  if (!movie) movie = movies.find(m => m.title === DEFAULT_MOVIE) || movies[0];
-  movieSelect.value = movie.title;
-
-  /* 4) تطبيق تفاصيل الفيلم */
-  applyMovieToModal(movie, preselectedTime);
-
-  /* 5) الشارة اليومية */
-  document.getElementById('modalDay').textContent = `${weekDays[currentDay].name} — ${weekDays[currentDay].date}`;
-
-  /* 6) إعادة تعيين نوع التذكرة */
-  currentBooking.ticketType = 'regular';
-  document.querySelectorAll('.ticket-tab').forEach(t => t.classList.toggle('active', t.dataset.type === 'regular'));
-  document.getElementById('vipPerks').classList.remove('show');
-  updateTotal();
-
-  /* 7) إظهار النافذة */
-  document.getElementById('modalBody').style.display = 'block';
-  document.getElementById('successBody').style.display = 'none';
-  modal.classList.add('show');
-  document.body.style.overflow = 'hidden';
-  document.querySelectorAll('.country-select.open').forEach(el => el.classList.remove('open'));
-}
-
-function closeBooking(){
-  const modal = document.getElementById('bookingModal');
-  if (!modal) return;
-  modal.classList.remove('show');
-  document.body.style.overflow = '';
-  document.querySelectorAll('.country-select.open').forEach(el => el.classList.remove('open'));
-}
-
-function selectTicketType(type){
-  currentBooking.ticketType = type;
-  document.querySelectorAll('.ticket-tab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
-  document.getElementById('vipPerks').classList.toggle('show', type === 'vip');
-  updateTotal();
-}
-
-function updateTotal(){
-  const price = TICKET_PRICES[currentBooking.ticketType];
-  const isVip = currentBooking.ticketType === 'vip';
-  document.getElementById('totalPrice').innerHTML = `${price} <small>﷼</small>`;
-  document.getElementById('totalSubLabel').textContent = isVip ? 'تذكرة VIP — تشمل مشروب + فشار' : 'تذكرة عادية';
-}
-
-/* ═══════════════════════════════════════════════════
-   قائمة الدول
-   ═══════════════════════════════════════════════════ */
-function renderCountryList(listId, containerId, q=''){
-  const listEl = document.getElementById(listId);
-  if (!listEl) return;
-  const qq = q.trim();
-  const cleanQ = qq.replace(/^\+/, '');
-  const filtered = COUNTRIES.filter(c => {
-    if (!qq) return true;
-    return c.name.includes(qq) || (c.nameEn && c.nameEn.toLowerCase().includes(qq.toLowerCase())) || c.code.replace('+','').includes(cleanQ);
-  });
-  if (!filtered.length){ listEl.innerHTML = `<div class="country-empty">لا توجد نتائج مطابقة</div>`; return; }
-  const sel = selectedCountries[containerId];
-  listEl.innerHTML = filtered.map(c => `
-    <div class="country-item ${c.code===sel.code?'selected':''}" onclick="selectCountry('${containerId}', '${c.code}', '${c.flag}')">
-      <span class="flag">${c.flag}</span><span class="cname">${c.name}</span><span class="ccode">${c.code}</span>
-    </div>`).join('');
-}
-function selectCountry(containerId, code, flag){
-  selectedCountries[containerId] = { code, flag };
-  const btn = document.querySelector(`#${containerId} .country-btn`);
-  if (btn){ btn.querySelector('.flag').textContent = flag; btn.querySelector('.code-text').textContent = code; }
-  document.getElementById(containerId).classList.remove('open');
-  const s = document.querySelector(`#${containerId} .country-search`);
-  if (s) s.value = '';
-}
-function toggleCountryDropdown(containerId){
-  const c = document.getElementById(containerId);
-  if (!c) return;
-  const wasOpen = c.classList.contains('open');
-  document.querySelectorAll('.country-select.open').forEach(el => el.classList.remove('open'));
-  if (!wasOpen){
-    c.classList.add('open');
-    const s = c.querySelector('.country-search');
-    if (s){ s.value = ''; setTimeout(() => s.focus(), 50); }
-    const listId = containerId === 'phoneCountrySelect' ? 'phoneCountryList' : 'whatsappCountryList';
-    renderCountryList(listId, containerId);
-  }
-}
-function filterCountryList(input, listId){
-  const c = input.closest('.country-select');
-  renderCountryList(listId, c.id, input.value);
-}
-
-/* ═══════════════════════════════════════════════════
-   تأكيد الحجز
-   ═══════════════════════════════════════════════════ */
-function submitBooking(e){
-  e.preventDefault();
-  const fullName = document.getElementById('fullName').value.trim();
-  const birthdate = document.getElementById('birthdate').value;
-  const phone = document.getElementById('phoneNumber').value.trim();
-  const whatsapp = document.getElementById('whatsappNumber').value.trim();
-  const showtime = document.getElementById('modalShowtime').value;
-
-  if (!currentBooking.movie){ alert('يرجى اختيار الفيلم'); return; }
-  if (fullName.split(/\s+/).length < 3){ alert('يرجى إدخال الاسم الثلاثي كاملاً'); return; }
-  if (!birthdate){ alert('يرجى إدخال تاريخ الميلاد'); return; }
-  if (phone.replace(/\D/g,'').length < 6){ alert('يرجى إدخال رقم هاتف صحيح'); return; }
-  if (whatsapp.replace(/\D/g,'').length < 6){ alert('يرجى إدخال رقم واتساب صحيح'); return; }
-
-  const phoneFull = selectedCountries.phoneCountrySelect.code + phone;
-  const price = TICKET_PRICES[currentBooking.ticketType];
-  const isVip = currentBooking.ticketType === 'vip';
-  const bookingRef = generateBookingRef();
-  document.getElementById('bookingRef').textContent = bookingRef;
-
-  const qrData = ['Cinema Plus Ticket', `Ref: ${bookingRef}`, `Movie: ${currentBooking.movie.title}`,
-    `Time: ${showtime}`, `Day: ${weekDays[currentDay].name} ${weekDays[currentDay].date}`,
-    `Type: ${isVip ? 'VIP' : 'Regular'}`, `Name: ${fullName}`, `Phone: ${phoneFull}`].join('\n');
-
-  const qr = document.getElementById('qrImage');
-  qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}&color=0a0a10&bgcolor=ffffff&margin=0`;
-  qr.alt = `تذكرة ${bookingRef}`;
-
-  document.getElementById('successMessage').innerHTML =
-    `تم حجز <strong>${isVip?'تذكرة VIP':'تذكرة عادية'}</strong> لمشاهدة فيلم <strong>«${currentBooking.movie.title}»</strong>${isVip?'<br><span style="color:#e71d24;font-weight:800">🍿 يشمل المشروبات والفشار</span>':''}`;
-
-  document.getElementById('modalBody').style.display = 'none';
-  document.getElementById('successBody').style.display = 'block';
-  document.getElementById('successBody').scrollTop = 0;
-  console.log('Booking:', { ref: bookingRef, movie: currentBooking.movie.title, showtime, type: currentBooking.ticketType, price, fullName, birthdate, phone: phoneFull, whatsapp: selectedCountries.whatsappCountrySelect.code + whatsapp });
-}
-
-/* ═══════════════════════════════════════════════════
    تحسينات الرئيسية — جسيمات، عدّادات، أنيميشن
    ═══════════════════════════════════════════════════ */
 function initHomeEnhancements(){
 
-  /* 1) الجسيمات المتطايرة */
   const particlesBox = document.getElementById('heroParticles');
   if (particlesBox){
     for (let i = 0; i < 30; i++){
@@ -966,7 +455,6 @@ function initHomeEnhancements(){
     }
   }
 
-  /* 2) عدّادات الأرقام */
   const counters = document.querySelectorAll('[data-count]');
   const animateCounter = (el) => {
     const target = parseInt(el.dataset.count, 10);
@@ -990,7 +478,6 @@ function initHomeEnhancements(){
   }, { threshold: 0.5 });
   counters.forEach(c => counterObserver.observe(c));
 
-  /* 3) ظهور عند التمرير */
   const revealObserver = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting){ e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
@@ -998,7 +485,6 @@ function initHomeEnhancements(){
   }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-  /* 4) تكرار التيكر للحلقة السلسة */
   const tickerTrack = document.getElementById('tickerTrack');
   if (tickerTrack){ tickerTrack.innerHTML += tickerTrack.innerHTML; }
 }
@@ -1008,15 +494,6 @@ function initHomeEnhancements(){
    ═══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
-
-  // ربط نافذة الحجز
-  document.getElementById('bookingModal')?.addEventListener('click', e => { if (e.target.id === 'bookingModal') closeBooking(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBooking(); });
-  document.addEventListener('click', e => { if (!e.target.closest('.country-select')) document.querySelectorAll('.country-select.open').forEach(el => el.classList.remove('open')); });
-  renderCountryList('phoneCountryList', 'phoneCountrySelect');
-  renderCountryList('whatsappCountryList', 'whatsappCountrySelect');
-
-  // تحسينات الصفحة الرئيسية
   if (document.body.dataset.page === 'home') initHomeEnhancements();
 });
 </script>

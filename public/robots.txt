@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+Disallow: /tickets/
+Disallow: /verify/
+Disallow: /admin
+
+Allow: /

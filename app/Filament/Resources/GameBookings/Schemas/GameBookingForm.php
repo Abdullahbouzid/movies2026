@@ -26,6 +26,11 @@ class GameBookingForm
                             ->label('تاريخ اللعب')
                             ->disabled()
                             ->dehydrated(false),
+                        Select::make('branch_id')
+                            ->label('الفرع')
+                            ->relationship('branch', 'name')
+                            ->searchable()
+                            ->preload(),
                         Select::make('game_id')
                             ->label('اللعبة')
                             ->relationship('game', 'name')
