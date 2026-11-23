@@ -78,6 +78,36 @@ class CurrencyAndBookingUiTest extends TestCase
         $this->assertStringNotContainsString('﷼', $html);
     }
 
+    /**
+     * Duplicate showtime rows for the same slot used to repeat the same time
+     * over and over inside the customer's dropdown.
+     */
+    public function test_payload_lists_each_slot_once_even_with_duplicate_rows(): void
+    {
+        ['movie' => $movie] = $this->seedMinimal();
+
+        foreach (range(1, 5) as $i) {
+            Showtime::create([
+                'movie_id' => $movie->id,
+                'day_of_week' => now()->dayOfWeek,
+                'start_time' => '10:00',
+                'end_time' => '12:00',
+                'show_date' => now()->toDateString(),
+                'seats_capacity' => 40,
+            ]);
+        }
+
+        $payload = $this->get('/movies')->assertOk()->viewData('payload');
+        $times = collect($payload['movies'][0]['times'][$payload['currentDay']]);
+
+        $this->assertSame(
+            $times->pluck('time')->unique()->count(),
+            $times->count(),
+            'The dropdown must not repeat the same start time.',
+        );
+        $this->assertSame(1, $times->where('time', '10:00')->count());
+    }
+
     public function test_booking_modal_renders_three_step_wizard(): void
     {
         $this->seedMinimal();

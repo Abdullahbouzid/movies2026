@@ -253,6 +253,20 @@ Override with `MOVIE_VIDEO_MAX_KB` / `UPLOAD_MAX_MINUTES`. The Filament field ke
   `App\Support\SeatAvailability` (cinema) and `App\Support\SlotAvailability`
   (club/event). Club/Event bookings wrap the create in `DB::transaction` with
   `lockForUpdate()` on the package row so concurrent requests cannot oversell.
+- **Duplicate showtime rows**: `MovieController::payload()` keeps one entry per
+  start time per day (`->unique()`), because duplicated rows for the same slot
+  used to repeat the same time over and over in the customer dropdown. Any new
+  per-day time list must dedupe the same way.
+- **Video/trailer**: `Movie::videoUrl()` + `Movie::videoType()` run the source
+  through `App\Support\VideoEmbed`, which returns `TYPE_FILE` (native `<video>`)
+  or `TYPE_EMBED` (provider `<iframe>`). `resources/views/movies/show.blade.php`
+  branches on the type. Uploads need `upload_max_filesize`/`post_max_size` raised
+  in **three** places: `php.ini` (CLI/built-in server), `public/.user.ini`
+  (FPM/CGI), and `public/.htaccess` (mod_php ignores `.user.ini`).
+- **Home page** is data-driven: `HomeController` (invokable) feeds
+  `resources/views/home/index.blade.php` + `public/css/home.css`. `/home` no
+  longer serves `public/site/index.html`.
+
 - **Rolling schedule**: showtimes are stored per concrete date, so the public grid
   expires once the seeded range runs out. `showtimes:generate --prune` tops up
   `config('cinema.schedule_horizon_days')` days and is scheduled nightly at 02:00

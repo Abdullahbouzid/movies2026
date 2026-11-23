@@ -242,7 +242,7 @@
     <ol class="steps" id="bookingSteps">
       <li class="step is-active" data-step="1">
         <span class="step-dot">1</span>
-        <span class="step-name">التذكرة</span>
+        <span class="step-name">اختيار التذكرة</span>
       </li>
       <li class="step" data-step="2">
         <span class="step-dot">2</span>
@@ -266,7 +266,7 @@
 
           <div class="field-modal">
             <label for="modalShowtime">وقت العرض <span class="req">*</span></label>
-            <select id="modalShowtime" required></select>
+            <select id="modalShowtime" onchange="onShowtimeChange(this)" required></select>
           </div>
 
           <div class="section-label">
@@ -278,6 +278,21 @@
           <div class="vip-perks" id="vipPerks">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             <span>تذكرة VIP تشمل المشروبات والفشار مجانًا 🍿🥤</span>
+          </div>
+
+          <div class="booking-summary" id="bookingSummary">
+            <div class="bs-item">
+              <span class="bs-label">الفيلم</span>
+              <strong class="bs-value" id="bsMovie">—</strong>
+            </div>
+            <div class="bs-item">
+              <span class="bs-label">الوقت</span>
+              <strong class="bs-value" id="bsTime">—</strong>
+            </div>
+            <div class="bs-item bs-price">
+              <span class="bs-label">السعر</span>
+              <strong class="bs-value" id="bsPrice">—</strong>
+            </div>
           </div>
 
           <div class="step-nav">

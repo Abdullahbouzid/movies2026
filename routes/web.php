@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\VerifyController;
@@ -17,7 +18,7 @@ Route::post('/movies/{movie}/book', [MovieController::class, 'book'])
 Route::get('/tickets/{ref}', [MovieController::class, 'ticket'])->name('movies.ticket');
 Route::get('/verify/ticket/{ref}', [VerifyController::class, 'movie'])->name('movies.verify');
 
-Route::get('/home', fn () => response()->file(public_path('site/index.html')))->name('site.home');
+Route::get('/home', HomeController::class)->name('site.home');
 
 Route::get('/games', [GameController::class, 'index'])->name('site.games');
 Route::post('/games/{game}/book', [GameController::class, 'book'])

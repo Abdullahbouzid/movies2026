@@ -94,6 +94,9 @@ class MovieController extends Controller
                     $byDay[$i] = $m->showtimes
                         ->filter(fn ($s) => $s->show_date?->toDateString() === $day['iso'])
                         ->sortBy('start_time')
+                        // Duplicate rows for one slot would otherwise repeat the
+                        // same time in the customer's dropdown.
+                        ->unique(fn ($s) => substr((string) $s->start_time, 0, 5))
                         ->map(fn ($s) => [
                             'id' => $s->id,
                             'time' => $s->start_time_short,

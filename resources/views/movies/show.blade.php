@@ -18,7 +18,8 @@
 .poster{border-radius:22px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.4)}
 .poster img{width:100%;display:block}
 .trailer{margin-bottom:24px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#000}
-.trailer video{width:100%;display:block;max-height:420px}
+.trailer video,.trailer iframe{width:100%;display:block;max-height:420px;border:0;aspect-ratio:16/9}
+.trailer video{aspect-ratio:auto}
 .info h1{font-size:clamp(26px,4vw,40px);font-weight:900;letter-spacing:-1px;margin-bottom:12px}
 .info .meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-weight:700;font-size:14px;margin-bottom:16px}
 .info .meta .star{color:var(--gold)}
@@ -57,9 +58,16 @@
 
       @if ($movie->videoUrl())
         <div class="trailer">
-          <video controls playsinline preload="metadata" poster="{{ $movie->image ? asset('storage/' . $movie->image) : '' }}">
-            <source src="{{ $movie->videoUrl() }}">
-          </video>
+          @if ($movie->videoType() === \App\Support\VideoEmbed::TYPE_EMBED)
+            <iframe src="{{ $movie->videoUrl() }}" title="{{ $movie->name }}" loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          @else
+            <video controls playsinline preload="metadata" poster="{{ $movie->image ? asset('storage/' . $movie->image) : '' }}">
+              <source src="{{ $movie->videoUrl() }}">
+              متصفحك لا يدعم تشغيل الفيديو.
+            </video>
+          @endif
         </div>
       @endif
 

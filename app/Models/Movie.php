@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\VideoEmbed;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -106,7 +107,19 @@ class Movie extends Model
 
     public function videoUrl(): ?string
     {
-        return $this->video ? asset('storage/' . $this->video) : $this->trailer_url;
+        $source = $this->video ? asset('storage/' . $this->video) : $this->trailer_url;
+
+        return VideoEmbed::resolve($source)['url'] ?? null;
+    }
+
+    /**
+     * How the player must be rendered: a native <video> file or a provider iframe.
+     */
+    public function videoType(): ?string
+    {
+        $source = $this->video ? asset('storage/' . $this->video) : $this->trailer_url;
+
+        return VideoEmbed::resolve($source)['type'] ?? null;
     }
 
     public function stars(): string

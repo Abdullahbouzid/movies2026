@@ -234,6 +234,24 @@ function updateTotal() {
   const pkg = PACKAGES.find(p => p.id === currentBooking.packageId);
   document.getElementById('totalPrice').innerHTML = `${money(price)} <small>د.ل</small>`;
   document.getElementById('totalSubLabel').textContent = pkg ? pkg.name : '';
+  updateSummary();
+}
+
+function updateSummary() {
+  const movie = currentBooking.movie;
+  if (!movie) return;
+
+  const movieEl = document.getElementById('bsMovie');
+  const timeEl = document.getElementById('bsTime');
+  const priceEl = document.getElementById('bsPrice');
+  if (!movieEl || !timeEl || !priceEl) return;
+
+  const showtime = currentBooking.showtimes.find(t => t.id === currentBooking.selectedShowtimeId);
+  const price = movie.prices[currentBooking.packageId];
+
+  movieEl.textContent = movie.title;
+  timeEl.textContent = showtime ? showtime.time : '—';
+  priceEl.textContent = price == null ? '—' : `${money(price)} د.ل`;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -275,6 +293,11 @@ function applyMovieToModal(movie, preselectedShowtimeId) {
   poster.classList.remove('pulse');
   void poster.offsetWidth;
   poster.classList.add('pulse');
+}
+
+function onShowtimeChange(select) {
+  currentBooking.selectedShowtimeId = Number(select.value);
+  updateSummary();
 }
 
 function onMovieChange() {

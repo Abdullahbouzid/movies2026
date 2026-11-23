@@ -3,6 +3,21 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # 150 MB movie video uploads. .user.ini covers FPM/CGI, but Apache with
+    # mod_php ignores it, so the limits are repeated here.
+    <IfModule mod_php.c>
+        php_value upload_max_filesize 160M
+        php_value post_max_size 170M
+        php_value memory_limit 512M
+        php_value max_execution_time 300
+    </IfModule>
+    <IfModule mod_php7.c>
+        php_value upload_max_filesize 160M
+        php_value post_max_size 170M
+        php_value memory_limit 512M
+        php_value max_execution_time 300
+    </IfModule>
+
     RewriteEngine On
 
     # Block dotfiles (.user.ini, .htaccess, .env …) from being served.

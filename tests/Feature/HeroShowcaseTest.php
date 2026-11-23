@@ -196,4 +196,59 @@ class HeroShowcaseTest extends TestCase
             ->assertSee('<video', false)
             ->assertSee('storage/movies/videos/trailer.mp4', false);
     }
+
+    /**
+     * A YouTube page URL cannot play inside <video>; it has to be embedded.
+     */
+    public function test_movie_show_page_embeds_external_provider_links(): void
+    {
+        $movie = $this->movie([
+            'video' => null,
+            'trailer_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $this->get("/movies/{$movie->id}")->assertOk()
+            ->assertSee('<iframe', false)
+            ->assertSee('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', false)
+            ->assertDontSee('<video', false);
+    }
+
+    public function test_uploaded_file_wins_over_external_link_and_stays_a_native_player(): void
+    {
+        $movie = $this->movie([
+            'video' => 'movies/videos/trailer.mp4',
+            'trailer_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $this->get("/movies/{$movie->id}")->assertOk()
+            ->assertSee('<video', false)
+            ->assertDontSee('<iframe', false);
+    }
+
+    public function test_php_upload_limits_allow_the_configured_video_size(): void
+    {
+        $limit = $this->iniBytes(ini_get('upload_max_filesize'));
+        $post = $this->iniBytes(ini_get('post_max_size'));
+        $wanted = (int) config('uploads.movie_video_max_kb') * 1024;
+
+        $this->assertGreaterThanOrEqual(
+            $wanted,
+            $limit,
+            'PHP upload_max_filesize is below the 150 MB the form advertises, so every video upload fails with UPLOAD_ERR_INI_SIZE.',
+        );
+        $this->assertGreaterThan($limit, $post, 'post_max_size must exceed upload_max_filesize.');
+    }
+
+    private function iniBytes(string $value): int
+    {
+        $value = trim($value);
+        $number = (int) $value;
+
+        return match (strtolower(substr($value, -1))) {
+            'g' => $number * 1024 ** 3,
+            'm' => $number * 1024 ** 2,
+            'k' => $number * 1024,
+            default => $number,
+        };
+    }
 }
